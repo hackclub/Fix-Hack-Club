@@ -4,130 +4,135 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FixHC - Under Construction</title>
+  <meta name="description" content="FixHC helps Hack Club members find small, high-impact projects to improve infra, pages, and polish across Hack Club sites.">
+  <meta property="og:title" content="FixHC - Under Construction">
+  <meta property="og:description" content="Find small Hack Club fixes, ship PRs, and help improve the ecosystem.">
+  <meta property="og:type" content="website">
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body id="top">
 
 <div class="caution-tape"></div>
 
 <nav>
-  <a class="nav-brand" href="">⚙ FixHC</a>
-  <ul class="nav-links">
+  <a class="nav-brand" href="#top">⚙ FixHC</a>
+  <button class="menu-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="main-nav-links">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <ul class="nav-links" id="main-nav-links">
     <li><a href="#how">How It Works</a></li>
     <li><a href="#jobs">Examples</a></li>
-    <li><a href="https://hackclub.com/slack" target="_blank" class="nav-cta">Join Slack</a></li>
+    <li><a href="https://hackclub.com/slack" target="_blank" rel="noopener noreferrer" class="nav-cta">Join Slack</a></li>
   </ul>
 </nav>
 
-<hero>
+<header class="hero">
   
   <h1><span class="yellow">Fix</span><br><span class="outline">Hack Club</span></h1>
   <p class="hero-desc">Submit PRs to improve Hack Club's infra. Fix CSS, add pages to YSWS programs, or anything else approved by the program managers.</p>
   <div class="btn-row">
-    <a href="https://forms.hackclub.com/fix-hack-club" target="_blank" class="btn btn-primary">⚒ Submit your contribution</a>
-    <a href="https://hackclub.enterprise.slack.com/archives/C0ALHGAASLV" target="_blank" class="btn btn-outline">Join #pull-quests</a>
-    <a href="https://github.com/hackclub/" target="_blank" class="btn btn-outline">Browse Repos</a>
+    <a href="https://forms.hackclub.com/fix-hack-club" target="_blank" rel="noopener noreferrer" class="btn btn-primary">⚒ Submit your contribution</a>
+    <a href="https://hackclub.enterprise.slack.com/archives/C0ALHGAASLV" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Join #pull-quests</a>
+    <a href="https://github.com/hackclub/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Browse Repos</a>
   </div>
   <p class="hero-note">The repos on the GitHub page are the most active ones.</p>
-</hero>
+</header>
 
 <div class="tape-divider"></div>
 
+<main>
 <div class="section" id="how">
-  <div class="section-inner">
-    <div class="section-label">Work Orders</div>
-    <div class="tickets">
-      <div class="ticket">
-        <div class="ticket-id">TICKET-01</div>
-        <h3>Find It</h3>
-        <p>Find broken things to fix, designs to improve, or missing content you think would be helpful!</p>
-        <div class="ticket-num">01</div>
-      </div>
-      <div class="ticket">
-        <div class="ticket-id">TICKET-02</div>
-        <h3>Fix It</h3>
-        <p>Fork the repo. Make your changes, and make a Pull Request!</p>
-        <div class="ticket-num">02</div>
-      </div>
-      <div class="ticket">
-        <div class="ticket-id">TICKET-03</div>
-        <h3>Ship It</h3>
-        <p>Work with Hack Club staff to get your PR reviewed and merged. Shipped = quest complete.</p>
-        <div class="ticket-num">03</div>
-      </div>
-      <div class="ticket">
-        <div class="ticket-id">TICKET-04</div>
-        <h3>Claim It</h3>
-        <p>Receive a grant depending on the amount of PRs & time spent making them.</p>
-        <div class="ticket-num">04</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="tape-divider"></div>
-
-<div class="section-alt" id="jobs">
-  <div class="section-inner">
-    <div class="section-label">Contribution Examples</div>
-    <div class="jobs">
-      <div class="job">
-        <div class="job-type">CSS</div>
-        <div class="job-title">Fix broken layout on a Hack Club site</div>
-        <div class="job-desc">Misaligned elements, broken mobile views, overlapping content. Pick a site and clean it up!</div>
-      </div>
-      <div class="job">
-        <div class="job-type">HTML</div>
-        <div class="job-title">Add a requirements page to a YSWS program</div>
-        <div class="job-desc">Programs need clear requirements. Build a page that tells participants exactly what they need to submit. (maybe an examples page as well on your way)</div>
-      </div>
-      <div class="job">
-        <div class="job-type">HTML</div>
-        <div class="job-title">Add a 404 page to a HackClub site</div>
-        <div class="job-desc">Missing a 404 page? Build one that fits the site's style!</div>
-      </div>
-      <div class="job">
-        <div class="job-type">JS</div>
-        <div class="job-title">Improve interactivity on an existing page</div>
-        <div class="job-desc">Buttons that don't do anything, forms that aren't wired up, missing feedback. Fix it!</div>
-      </div>
-      <div class="job">
-        <div class="job-type">CSS</div>
-        <div class="job-title">Add a dark mode to a Hack Club site</div>
-        <div class="job-desc">Add a dark mode toggle using CSS variables and a bit of class switching.</div>
-      </div>
-      <div class="job">
-        <div class="job-type">ANY</div>
-        <div class="job-title">Got your own idea?</div>
-        <div class="job-desc">If it improves Hack Club infra and gets approved by a program manager, it counts. Go for it!</div>
+      <div class="section-inner">
+        <div class="section-label">Work Orders</div>
+        <div class="tickets">
+          <div class="ticket">
+            <div class="ticket-id">TICKET-01</div>
+            <h3>Find It</h3>
+            <p>Find broken things to fix, designs to improve, or missing content you think would be helpful!</p>
+            <div class="ticket-num">01</div>
+          </div>
+          <div class="ticket">
+            <div class="ticket-id">TICKET-02</div>
+            <h3>Fix It</h3>
+            <p>Fork the repo. Make your changes, and make a Pull Request!</p>
+            <div class="ticket-num">02</div>
+          </div>
+          <div class="ticket">
+            <div class="ticket-id">TICKET-03</div>
+            <h3>Ship It</h3>
+            <p>Work with Hack Club staff to get your PR reviewed and merged. Shipped = quest complete.</p>
+            <div class="ticket-num">03</div>
+          </div>
+          <div class="ticket">
+            <div class="ticket-id">TICKET-04</div>
+            <h3>Claim It</h3>
+            <p>Receive a grant depending on the amount of PRs & time spent making them.</p>
+            <div class="ticket-num">04</div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="bottom-actions">
-      <div class="code-block">
-<span class="dim"># clock in and get to work</span>
-<br>
+    <div class="tape-divider"></div>
+
+    <div class="section-alt" id="jobs">
+      <div class="section-inner">
+        <div class="section-label">Contribution Examples</div>
+        <div class="jobs">
+          <div class="job">
+            <div class="job-type">CSS</div>
+            <div class="job-title">Fix broken layout on a Hack Club site</div>
+            <div class="job-desc">Misaligned elements, broken mobile views, overlapping content. Pick a site and clean it up!</div>
+          </div>
+          <div class="job">
+            <div class="job-type">HTML</div>
+            <div class="job-title">Add a requirements page to a YSWS program</div>
+            <div class="job-desc">Programs need clear requirements. Build a page that tells participants exactly what they need to submit. (maybe an examples page as well on your way)</div>
+          </div>
+          <div class="job">
+            <div class="job-type">HTML</div>
+            <div class="job-title">Add a 404 page to a HackClub site</div>
+            <div class="job-desc">Missing a 404 page? Build one that fits the site's style!</div>
+          </div>
+          <div class="job">
+            <div class="job-type">JS</div>
+            <div class="job-title">Improve interactivity on an existing page</div>
+            <div class="job-desc">Buttons that don't do anything, forms that aren't wired up, missing feedback. Fix it!</div>
+          </div>
+          <div class="job">
+            <div class="job-type">CSS</div>
+            <div class="job-title">Add a dark mode to a Hack Club site</div>
+            <div class="job-desc">Add a dark mode toggle using CSS variables and a bit of class switching.</div>
+          </div>
+          <div class="job">
+            <div class="job-type">ANY</div>
+            <div class="job-title">Got your own idea?</div>
+            <div class="job-desc">If it improves Hack Club infra and gets approved by a program manager, it counts. Go for it!</div>
+          </div>
+        </div>
+
+        <div class="bottom-actions">
+          <pre class="code-block"><code><span class="dim"># clock in and get to work</span>
 <span class="hi">git clone</span> https://github.com/hackclub/<span class="green">&lt;repo&gt;</span>
-<br>
 <span class="hi">git checkout</span> -b fix/your-fix-name
-<br>
 <span class="dim"># do the work...</span>
-<br>
 <span class="hi">git push</span> origin fix/your-fix-name
-<br>
-<span class="dim"># open PR</span>
+<span class="dim"># open PR</span></code></pre>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+</main>
 
 <div class="caution-tape"></div>
 
 <footer>
-  <span>FixHC - a <a href="https://hackclub.com" target="_blank">Hack Club</a> PullQuest</span>
-  <span><a href="https://github.com/hackclub" target="_blank">GitHub</a> · <a href="https://hackclub.com/slack" target="_blank">Slack</a> · <a href="https://hackclub.com" target="_blank">hackclub.com</a></span>
+  <span>FixHC - a <a href="https://hackclub.com" target="_blank" rel="noopener noreferrer">Hack Club</a> PullQuest</span>
+  <span><a href="https://github.com/hackclub" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="https://hackclub.com/slack" target="_blank" rel="noopener noreferrer">Slack</a> · <a href="https://hackclub.com" target="_blank" rel="noopener noreferrer">hackclub.com</a></span>
 </footer>
+
+<script type="module" src="/src/main.js"></script>
 
 </body>
 </html>
