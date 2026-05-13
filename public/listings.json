@@ -1,0 +1,19 @@
+{
+  "listings": [
+    {
+      "id": "LISTING-1",
+      "title": "Slack.hackclub.com",
+      "description": "Show this page some love! Make Pull Requests fulfilling all 4 of the following requests and you will receive the honor of chosing a custom Slackbot reply! Courtesy of Sir Evan, the SlackMaster. (in addition to a grant for each PR)",
+      "requirements": [
+        "Nicer header graphic.",
+        "Fix or remove the animation on the 'join hack club' box.",
+        "Better backgrounds or graphics generally.",
+        "Add animated screen recording gifs illustrating how to use Slack in the 'How Slack Works' sections."
+      ],
+      "url": "https://slack.hackclub.com/",
+      "github_url": "https://github.com/hackclub/slack.hackclub.com",
+      "status": "finished",
+      "completed_at": "2026-05-13T12:00:00Z"
+    }
+  ]
+}
