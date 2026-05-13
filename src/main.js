@@ -38,6 +38,42 @@ if (toggle && navLinks) {
   });
 }
 
+async function loadListings() {
+  try {
+    const response = await fetch('/listings.json');
+    const data = await response.json();
+    const container = document.getElementById('job-listings-container');
+
+    if (!container || !data.listings) return;
+
+    data.listings.forEach((listing) => {
+      const ticket = document.createElement('div');
+      ticket.className = 'ticketA';
+      if (listing.status === 'finished') {
+        ticket.classList.add('finished');
+      }
+      ticket.innerHTML = `
+        <div class="ticket-idA">${listing.id}</div>
+        <h3><a href="${listing.url}" target="_blank" style="text-decoration: none; color: #ffffff;">${listing.title}</a></h3>
+        <p>${listing.description}</p>
+        <br>
+        <ul style="font-size: 25px;">
+          ${listing.requirements.map(req => `<li>${req}</li>`).join('<br>')}
+        </ul>
+        <div class="btn-row" style="margin-top: 50px;">
+          <a href="${listing.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Page Link</a>
+          <a href="${listing.github_url}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Github Repository</a>
+        </div>
+      `;
+      container.appendChild(ticket);
+    });
+  } catch (error) {
+    console.error('Error loading listings:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadListings);
+
 const revealItems = document.querySelectorAll(
   '.hero h1, .hero-desc, .btn-row, .hero-note, .section-label, .ticket, .job, .code-block'
 );
