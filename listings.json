@@ -3,7 +3,7 @@
     {
       "id": "LISTING-1",
       "title": "Slack.hackclub.com",
-      "description": "Show this page some love! Make Pull Requests fulfilling all 4 of the following requests and you will receive the honor of chosing a custom Slackbot reply! Courtesy of Sir Evan, the SlackMaster. (in addition to a grant for each PR)",
+      "description": "Show this page some love! Make Pull Requests Fulfilling the following requests to earn grants!",
       "requirements": [
         "Nicer header graphic.",
         "Fix or remove the animation on the 'join hack club' box.",
