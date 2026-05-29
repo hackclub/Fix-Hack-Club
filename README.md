@@ -14,3 +14,12 @@ npm run dev
 ```bash
 npm run build
 ```
+### Manul sync for leader board
+
+```bash
+npm run leaderboard:sync
+```
+Required environment variables:
+
+AIRTABLE_TOKEN
+AIRTABLE_BASE_ID
