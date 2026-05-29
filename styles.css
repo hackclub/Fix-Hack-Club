@@ -438,6 +438,53 @@ main {
 .code-block .hi { color: #f1c40f; }
 .code-block .green { color: #33d6a6; }
 
+#leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.leaderboard-entry {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+
+  align-items: center;
+  gap: 16px;
+
+  padding: 16px 20px;
+
+  background: #111000;
+
+  border: 2px solid #2a2200;
+  border-left: 6px solid #f1c40f;
+}
+
+.rank {
+  color: #f1c40f;
+  font-weight: 900;
+  font-size: 24px;
+}
+
+.player-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.player-score {
+  font-size: 24px;
+  font-weight: 900;
+  color: white;
+}
+.top-three {
+  border-color: #f1c40f;
+
+  background: linear-gradient(
+    90deg,
+    rgba(241, 196, 15, 0.12),
+    rgba(241, 196, 15, 0.02)
+  );
+}
+
 footer {
   background: #0a0900;
   border-top: 3px solid #f1c40f;
