@@ -21,5 +21,5 @@ npm run leaderboard:sync
 ```
 Required environment variables:
 
-AIRTABLE_TOKEN
-AIRTABLE_BASE_ID
+- AIRTABLE_TOKEN
+- AIRTABLE_BASE_ID
