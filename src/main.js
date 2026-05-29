@@ -71,6 +71,46 @@ async function loadListings() {
     console.error('Error loading listings:', error);
   }
 }
+async function loadLeaderboard() {
+  const response = await fetch(
+    "/leaderboard.json"
+  );
+
+  const players = await response.json();
+
+  renderLeaderboard(players);
+}
+function renderLeaderboard(players) {
+  const container = document.getElementById(
+    "leaderboard-list"
+  );
+
+  container.innerHTML = players
+    .map(
+      (player, index) => `
+        <div class="leaderboard-entry ${
+          index < 3 ? "top-three" : ""
+        }">
+
+          <div class="rank">
+            #${index + 1}
+          </div>
+
+          <div class="player-info">
+            <div class="player-name">
+              ${player.name}
+            </div>
+          </div>
+
+          <div class="player-score">
+            ${player.score}
+          </div>
+
+        </div>
+      `
+    )
+    .join("");
+}
 
 document.addEventListener('DOMContentLoaded', loadListings);
 
