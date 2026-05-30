@@ -77,6 +77,7 @@ async function loadLeaderboard() {
   );
 
   const players = await response.json();
+  loadLeaderboard()
 
   renderLeaderboard(players);
 }
