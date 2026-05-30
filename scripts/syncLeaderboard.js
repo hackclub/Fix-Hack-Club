@@ -7,7 +7,7 @@ const base = new Airtable({
 
 const records = [];
 
-await base("Leaderboard")
+await base("Table 1")
   .select({
     sort: [{ field: "Contributions", direction: "desc" }],
   })
