@@ -8,6 +8,7 @@ import {
   normalizeHackClubProfile,
 } from '@/lib/hackclub';
 import { getOrigin } from '@/lib/origin';
+import { isAdminId } from '@/lib/admin';
 import type { HackClubProfile } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -22,6 +23,7 @@ async function upsertUser(profile: HackClubProfile) {
     slackId: profile.slack_id || null,
     verificationStatus: profile.verification_status || null,
     avatar: profile.avatar || null,
+    role: (isAdminId(profile.id) ? 'ADMIN' : 'MEMBER') as const,
     lastSignedInAt: new Date(),
   };
 

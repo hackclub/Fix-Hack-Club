@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useState, type FormEvent, type MouseEvent } from 'react';
 import type { HackClubProfile, SubmissionDTO } from '@/lib/types';
 
-export default function DashboardWorkspace({ user }: { user: HackClubProfile }) {
+export default function DashboardWorkspace({
+  user,
+  balance,
+}: {
+  user: HackClubProfile;
+  balance: number;
+}) {
   const [submissions, setSubmissions] = useState<SubmissionDTO[]>([]);
   const [feedback, setFeedback] = useState('Fill out the form to log a contribution.');
   const [submitting, setSubmitting] = useState(false);
@@ -80,8 +86,8 @@ export default function DashboardWorkspace({ user }: { user: HackClubProfile }) 
         </div>
         <div className="dash-stats">
           <div className="dashboard-stat">
-            <span className="dashboard-stat__label">Status</span>
-            <span className="dashboard-stat__value">Signed in</span>
+            <span className="dashboard-stat__label">Points</span>
+            <span className="dashboard-stat__value">{balance}</span>
           </div>
           <div className="dashboard-stat">
             <span className="dashboard-stat__label">Submissions</span>
@@ -174,7 +180,10 @@ export default function DashboardWorkspace({ user }: { user: HackClubProfile }) 
                   <article className="dashboard-list__item" key={submission.id}>
                     <div className="dashboard-list__item-head">
                       <h4>{submission.title}</h4>
-                      <span>{submission.status || submission.category || 'Submitted'}</span>
+                      <span className={`status-badge status-${(submission.status || 'submitted').toLowerCase()}`}>
+                        {submission.status}
+                        {submission.status === 'Approved' && submission.points ? ` · +${submission.points}` : ''}
+                      </span>
                     </div>
                     <p>{submission.notes || 'No notes provided.'}</p>
                     {submission.url ? (

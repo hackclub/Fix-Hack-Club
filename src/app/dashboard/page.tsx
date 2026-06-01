@@ -1,6 +1,6 @@
-import { cookies } from 'next/headers';
-import { config } from '@/lib/config';
-import { readSessionValue } from '@/lib/hackclub';
+import Link from 'next/link';
+import { isAdminId } from '@/lib/admin';
+import { getDbUser, getSessionProfile } from '@/lib/session';
 import DashboardWorkspace from '@/components/DashboardWorkspace';
 
 export const runtime = 'nodejs';
@@ -11,22 +11,19 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const user = readSessionValue(cookieStore.get(config.sessionCookieName)?.value);
+  const profile = await getSessionProfile();
 
-  if (!user) {
+  if (!profile) {
     return (
       <div className="dash-body">
         <div className="caution-tape"></div>
 
         <header className="dash-topbar">
-          <a className="nav-brand" href="/">
-            ⚙ FixHC
-          </a>
+          <a className="nav-brand" href="/">⚙ FixHC</a>
           <div className="dash-topbar__right">
-            <a className="dash-topbar__link" href="/">
-              Back to site
-            </a>
+            <a className="dash-topbar__link" href="/explore">Explore</a>
+            <a className="dash-topbar__link" href="/shop">Shop</a>
+            <a className="dash-topbar__link" href="/">Back to site</a>
           </div>
         </header>
 
@@ -53,24 +50,24 @@ export default async function DashboardPage() {
     );
   }
 
-  const displayName = user.display_name || user.first_name || user.email || 'Member';
+  const dbUser = await getDbUser();
+  const admin = isAdminId(profile.id);
+  const displayName = profile.display_name || profile.first_name || profile.email || 'Member';
 
   return (
     <div className="dash-body">
       <div className="caution-tape"></div>
 
       <header className="dash-topbar">
-        <a className="nav-brand" href="/">
-          ⚙ FixHC
-        </a>
+        <a className="nav-brand" href="/">⚙ FixHC</a>
         <div className="dash-topbar__right">
-          <a className="dash-topbar__link" href="/">
-            Back to site
-          </a>
+          <Link className="dash-topbar__link" href="/explore">Explore</Link>
+          <Link className="dash-topbar__link" href="/shop">Shop</Link>
+          {admin ? <Link className="dash-topbar__link" href="/admin">Admin</Link> : null}
           <div className="dash-user">
-            {user.avatar ? (
+            {profile.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img className="dash-user__avatar" src={user.avatar} alt="" width={32} height={32} />
+              <img className="dash-user__avatar" src={profile.avatar} alt="" width={32} height={32} />
             ) : null}
             <span className="dash-user__name">{displayName}</span>
             <a className="btn btn-outline dash-user__signout" href="/api/auth/logout">
@@ -81,7 +78,7 @@ export default async function DashboardPage() {
       </header>
 
       <main className="dash-shell">
-        <DashboardWorkspace user={user} />
+        <DashboardWorkspace user={profile} balance={dbUser?.balance ?? 0} />
       </main>
 
       <div className="caution-tape"></div>

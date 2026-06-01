@@ -1,0 +1,160 @@
+import { prisma } from './db';
+
+// Approve a submission and award points: bump the author's balance + lifetime
+// earned and record a ledger entry, all in one transaction.
+export async function approveSubmission(submissionId: string, points: number, adminId: string) {
+  const submission = await prisma.submission.findUnique({ where: { id: submissionId } });
+  if (!submission) {
+    throw new Error('Submission not found');
+  }
+
+  const award = Number.isFinite(points) && points > 0 ? Math.floor(points) : 0;
+  const author = await prisma.user.findUnique({ where: { hackClubId: submission.hackClubId } });
+
+  await prisma.$transaction(async (tx) => {
+    // Reverse any previously awarded points before re-applying.
+    if (submission.status === 'Approved' && submission.pointsAwarded > 0 && author) {
+      await tx.user.update({
+        where: { id: author.id },
+        data: {
+          balance: { decrement: submission.pointsAwarded },
+          totalEarned: { decrement: submission.pointsAwarded },
+        },
+      });
+    }
+
+    await tx.submission.update({
+      where: { id: submissionId },
+      data: {
+        status: 'Approved',
+        pointsAwarded: award,
+        reviewedAt: new Date(),
+        reviewedById: adminId,
+      },
+    });
+
+    if (author && award > 0) {
+      await tx.user.update({
+        where: { id: author.id },
+        data: { balance: { increment: award }, totalEarned: { increment: award } },
+      });
+      await tx.ledgerEntry.create({
+        data: { userId: author.id, delta: award, reason: `Submission approved: ${submission.title}` },
+      });
+    }
+  });
+}
+
+// Reject a submission. If it had been approved, claw back the points.
+export async function rejectSubmission(submissionId: string, adminId: string) {
+  const submission = await prisma.submission.findUnique({ where: { id: submissionId } });
+  if (!submission) {
+    throw new Error('Submission not found');
+  }
+
+  const author = await prisma.user.findUnique({ where: { hackClubId: submission.hackClubId } });
+
+  await prisma.$transaction(async (tx) => {
+    if (submission.status === 'Approved' && submission.pointsAwarded > 0 && author) {
+      await tx.user.update({
+        where: { id: author.id },
+        data: {
+          balance: { decrement: submission.pointsAwarded },
+          totalEarned: { decrement: submission.pointsAwarded },
+        },
+      });
+      await tx.ledgerEntry.create({
+        data: { userId: author.id, delta: -submission.pointsAwarded, reason: `Submission reverted: ${submission.title}` },
+      });
+    }
+
+    await tx.submission.update({
+      where: { id: submissionId },
+      data: { status: 'Rejected', pointsAwarded: 0, reviewedAt: new Date(), reviewedById: adminId },
+    });
+  });
+}
+
+// Manual admin balance adjustment (positive or negative).
+export async function adjustBalance(userId: string, delta: number, reason: string) {
+  const amount = Math.trunc(delta);
+  if (!Number.isFinite(amount) || amount === 0) {
+    return;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        balance: { increment: amount },
+        ...(amount > 0 ? { totalEarned: { increment: amount } } : {}),
+      },
+    });
+    await tx.ledgerEntry.create({
+      data: { userId, delta: amount, reason: reason || 'Admin adjustment' },
+    });
+  });
+}
+
+// Member redeems a shop item: validate stock + balance, spend points, create order.
+export async function redeemItem(userId: string, itemId: string) {
+  await prisma.$transaction(async (tx) => {
+    const item = await tx.shopItem.findUnique({ where: { id: itemId } });
+    if (!item || !item.active) {
+      throw new Error('This item is not available.');
+    }
+    if (item.stock !== null && item.stock <= 0) {
+      throw new Error('This item is out of stock.');
+    }
+
+    const user = await tx.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    if (user.balance < item.cost) {
+      throw new Error('You do not have enough points for this item.');
+    }
+
+    await tx.user.update({ where: { id: userId }, data: { balance: { decrement: item.cost } } });
+    await tx.ledgerEntry.create({ data: { userId, delta: -item.cost, reason: `Shop: ${item.name}` } });
+
+    if (item.stock !== null) {
+      await tx.shopItem.update({ where: { id: itemId }, data: { stock: { decrement: 1 } } });
+    }
+
+    await tx.shopOrder.create({
+      data: { userId, shopItemId: item.id, itemName: item.name, cost: item.cost, status: 'pending' },
+    });
+  });
+}
+
+export async function fulfillOrder(orderId: string, note: string) {
+  await prisma.shopOrder.update({
+    where: { id: orderId },
+    data: { status: 'fulfilled', fulfillmentNote: note ? note : null },
+  });
+}
+
+// Reject/refund an order: return points and restock, once.
+export async function refundOrder(orderId: string) {
+  await prisma.$transaction(async (tx) => {
+    const order = await tx.shopOrder.findUnique({ where: { id: orderId } });
+    if (!order || order.status === 'rejected') {
+      return;
+    }
+
+    await tx.user.update({ where: { id: order.userId }, data: { balance: { increment: order.cost } } });
+    await tx.ledgerEntry.create({
+      data: { userId: order.userId, delta: order.cost, reason: `Refund: ${order.itemName}` },
+    });
+
+    if (order.shopItemId) {
+      const item = await tx.shopItem.findUnique({ where: { id: order.shopItemId } });
+      if (item && item.stock !== null) {
+        await tx.shopItem.update({ where: { id: order.shopItemId }, data: { stock: { increment: 1 } } });
+      }
+    }
+
+    await tx.shopOrder.update({ where: { id: orderId }, data: { status: 'rejected' } });
+  });
+}

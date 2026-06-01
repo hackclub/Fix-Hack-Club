@@ -28,5 +28,6 @@ export interface SubmissionDTO {
   category: string;
   notes: string;
   status: string;
+  points: number;
   created_at: string | null;
 }

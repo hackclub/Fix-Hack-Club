@@ -49,6 +49,12 @@ export default function Nav() {
           </a>
         </li>
         <li>
+          <a href="/explore">Explore</a>
+        </li>
+        <li>
+          <a href="/shop">Shop</a>
+        </li>
+        <li>
           <a href="/dashboard" className="nav-cta">
             Open Dashboard
           </a>

@@ -38,6 +38,20 @@ async function main() {
   }
 
   console.log(`Seeded ${listings.length} listing(s).`);
+
+  const shopCount = await prisma.shopItem.count();
+  if (shopCount === 0) {
+    await prisma.shopItem.createMany({
+      data: [
+        { name: 'FixHC Sticker Pack', description: 'A set of vinyl FixHC stickers.', cost: 50, stock: null },
+        { name: 'Hack Club T-Shirt', description: 'Classic Hack Club tee.', cost: 250, stock: 25 },
+        { name: 'Custom Repo Shoutout', description: 'We feature your fix in the #pull-quests channel.', cost: 100, stock: null },
+      ],
+    });
+    console.log('Seeded 3 shop item(s).');
+  } else {
+    console.log(`Shop already has ${shopCount} item(s); skipping shop seed.`);
+  }
 }
 
 main()

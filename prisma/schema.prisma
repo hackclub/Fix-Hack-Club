@@ -1,6 +1,6 @@
 // Prisma schema for Fix-Hack-Club
 // Postgres-backed. Run `npx prisma migrate deploy` (or `npx prisma db push`)
-// then `npx prisma db seed` to load the starter listings.
+// then `npx prisma db seed` to load the starter data.
 
 generator client {
   provider = "prisma-client-js"
@@ -10,6 +10,11 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  MEMBER
+  ADMIN
 }
 
 model Listing {
@@ -40,27 +45,86 @@ model User {
   slackId            String?   @map("slack_id")
   verificationStatus String?   @map("verification_status")
   avatar             String?
+  role               Role      @default(MEMBER)
+  balance            Int       @default(0)
+  totalEarned        Int       @default(0) @map("total_earned")
+  bio                String?
   lastSignedInAt     DateTime? @map("last_signed_in_at")
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  ledger LedgerEntry[]
+  orders ShopOrder[]
 
   @@map("users")
 }
 
 model Submission {
-  id          String   @id @default(cuid())
-  hackClubId  String   @map("hack_club_id")
-  email       String?
-  displayName String?  @map("display_name")
-  title       String
-  url         String   @default("")
-  repo        String   @default("")
-  category    String   @default("Other")
-  notes       String   @default("")
-  status      String   @default("Submitted")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String    @id @default(cuid())
+  hackClubId   String    @map("hack_club_id")
+  email        String?
+  displayName  String?   @map("display_name")
+  title        String
+  url          String    @default("")
+  repo         String    @default("")
+  category     String    @default("Other")
+  notes        String    @default("")
+  status       String    @default("Submitted")
+  pointsAwarded Int      @default(0) @map("points_awarded")
+  reviewedAt   DateTime? @map("reviewed_at")
+  reviewedById String?   @map("reviewed_by_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
 
   @@index([hackClubId])
   @@index([email])
+  @@index([status])
   @@map("submissions")
+}
+
+model LedgerEntry {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  delta     Int
+  reason    String   @default("")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ledger_entries")
+}
+
+model ShopItem {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  cost        Int      @default(0)
+  imageUrl    String?  @map("image_url")
+  stock       Int?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  orders ShopOrder[]
+
+  @@map("shop_items")
+}
+
+model ShopOrder {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  shopItemId      String?  @map("shop_item_id")
+  itemName        String   @map("item_name")
+  cost            Int      @default(0)
+  status          String   @default("pending")
+  fulfillmentNote String?  @map("fulfillment_note")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopItem ShopItem? @relation(fields: [shopItemId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@map("shop_orders")
 }

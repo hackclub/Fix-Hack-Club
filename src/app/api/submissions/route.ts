@@ -18,6 +18,7 @@ function serialize(submission: Submission): SubmissionDTO {
     category: submission.category || 'Other',
     notes: submission.notes || '',
     status: submission.status || 'Submitted',
+    points: submission.pointsAwarded || 0,
     created_at: submission.createdAt ? submission.createdAt.toISOString() : null,
   };
 }

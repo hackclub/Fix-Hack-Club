@@ -16,5 +16,7 @@ services:
         sync: false
       - key: HACKCLUB_CLIENT_SECRET
         sync: false
+      - key: ADMIN_HACK_CLUB_IDS
+        sync: false
       - key: SESSION_SECRET
         generateValue: true
