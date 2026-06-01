@@ -9,6 +9,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # ---- Dependencies (tolerate a missing lockfile) ----
 FROM base AS deps
 COPY package.json package-lock.json* ./
+# The postinstall script runs `prisma generate`, so the schema must be present.
+COPY prisma ./prisma
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # ---- Build (the build script runs `prisma generate` then `next build`) ----
