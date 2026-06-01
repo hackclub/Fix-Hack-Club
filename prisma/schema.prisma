@@ -1,0 +1,66 @@
+// Prisma schema for Fix-Hack-Club
+// Postgres-backed. Run `npx prisma migrate deploy` (or `npx prisma db push`)
+// then `npx prisma db seed` to load the starter listings.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Listing {
+  id           String    @id @default(cuid())
+  externalId   String?   @unique @map("external_id")
+  title        String
+  description  String    @default("")
+  requirements String[]  @default([])
+  url          String    @default("")
+  githubUrl    String    @default("") @map("github_url")
+  status       String    @default("active")
+  priority     Int       @default(0)
+  completedAt  DateTime? @map("completed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([priority])
+  @@map("listings")
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  hackClubId         String    @unique @map("hack_club_id")
+  email              String?
+  displayName        String?   @map("display_name")
+  firstName          String?   @map("first_name")
+  lastName           String?   @map("last_name")
+  slackId            String?   @map("slack_id")
+  verificationStatus String?   @map("verification_status")
+  avatar             String?
+  lastSignedInAt     DateTime? @map("last_signed_in_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  hackClubId  String   @map("hack_club_id")
+  email       String?
+  displayName String?  @map("display_name")
+  title       String
+  url         String   @default("")
+  repo        String   @default("")
+  category    String   @default("Other")
+  notes       String   @default("")
+  status      String   @default("Submitted")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([hackClubId])
+  @@index([email])
+  @@map("submissions")
+}

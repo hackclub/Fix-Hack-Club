@@ -1,4 +1,4 @@
-import { airtableConfigured, upsertAirtableRecord } from '../_lib/airtable.js';
+import { prisma } from '../_lib/db.js';
 import { config } from '../_lib/config.js';
 import { buildCookie, getOrigin, json, readCookies, redirect } from '../_lib/http.js';
 import {
@@ -8,18 +8,23 @@ import {
 	normalizeHackClubProfile,
 } from '../_lib/hackclub.js';
 
-function userFields(profile) {
-	return {
-		'Hack Club ID': profile.id,
-		Email: profile.email,
-		'Display Name': profile.display_name,
-		'First Name': profile.first_name,
-		'Last Name': profile.last_name,
-		'Slack ID': profile.slack_id,
-		'Verification Status': profile.verification_status,
-		Avatar: profile.avatar,
-		'Last Signed In At': new Date().toISOString(),
+async function upsertUser(profile) {
+	const data = {
+		email: profile.email || null,
+		displayName: profile.display_name || null,
+		firstName: profile.first_name || null,
+		lastName: profile.last_name || null,
+		slackId: profile.slack_id || null,
+		verificationStatus: profile.verification_status || null,
+		avatar: profile.avatar || null,
+		lastSignedInAt: new Date(),
 	};
+
+	await prisma.user.upsert({
+		where: { hackClubId: profile.id },
+		update: data,
+		create: { hackClubId: profile.id, ...data },
+	});
 }
 
 export default async function handler(req, res) {
@@ -49,16 +54,7 @@ export default async function handler(req, res) {
 			throw new Error('Hack Club profile did not include an identity id');
 		}
 
-		if (airtableConfigured()) {
-			await upsertAirtableRecord(
-				config.airtableUsersTable,
-				[
-					{ field: 'Hack Club ID', value: profile.id },
-					{ field: 'Email', value: profile.email },
-				],
-				userFields(profile)
-			);
-		}
+		await upsertUser(profile);
 
 		const sessionCookie = buildCookie(config.sessionCookieName, createSessionValue(profile), {
 			path: '/',
@@ -76,7 +72,7 @@ export default async function handler(req, res) {
 			secure: origin.startsWith('https://'),
 		});
 
-		redirect(res, '/#account', 302, {
+		redirect(res, '/dashboard', 302, {
 			'Set-Cookie': [stateCookie, sessionCookie],
 		});
 	} catch (error) {

@@ -5,13 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "prisma generate && vite build",
+    "preview": "vite preview",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio"
   },
-  "devDependencies": {
-    "vite": "^5.4.14"
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "pg": "^8.21.0"
+    "@prisma/client": "^6.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.0.0",
+    "vite": "^5.4.14"
   }
 }

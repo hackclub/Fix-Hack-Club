@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 	const origin = getOrigin(req);
 	const expired = new Date(0);
 
-	redirect(res, '/#top', 302, {
+	redirect(res, '/', 302, {
 		'Set-Cookie': [
 			buildCookie(config.sessionCookieName, '', {
 				path: '/',

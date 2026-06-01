@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="/logo.png">
-  <title>FixHC - Under Construction</title>
+  <title>FixHC - Fix Hack Club</title>
   <meta name="description" content="FixHC helps Hack Club members find small, high-impact projects to improve infra, pages, and polish across Hack Club sites.">
-  <meta property="og:title" content="FixHC - Under Construction">
+  <meta property="og:title" content="FixHC - Fix Hack Club">
   <meta property="og:description" content="Find small Hack Club fixes, ship PRs, and help improve the ecosystem.">
   <meta property="og:type" content="website">
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
@@ -26,22 +26,22 @@
   <ul class="nav-links" id="main-nav-links">
     <li><a href="#how">How It Works</a></li>
     <li><a href="#jobs">Examples</a></li>
-    <li><a href="#account">Hack Club Account</a></li>
-    <li><a href="#dashboard">Dashboard</a></li>
-    <li><a href="https://hackclub.com/slack" target="_blank" rel="noopener noreferrer" class="nav-cta">Join Slack</a></li>
+    <li><a href="#contribute">Contribute</a></li>
+    <li><a href="/dashboard" class="nav-cta">Open Dashboard</a></li>
+    <li><a href="https://hackclub.com/slack" target="_blank" rel="noopener noreferrer">Join Slack</a></li>
   </ul>
 </nav>
 
 <header class="hero">
-  
+
   <h1><span class="yellow">Fix</span><br><span class="outline">Hack Club</span></h1>
   <p class="hero-desc">Submit PRs to improve Hack Club's infra. Fix CSS, add pages to YSWS programs, or anything else approved by the program managers.</p>
   <div class="btn-row">
-    <a href="https://forms.hackclub.com/fix-hack-club" target="_blank" rel="noopener noreferrer" class="btn btn-primary">⚒ Submit your contribution</a>
+    <a href="/dashboard" class="btn btn-primary">⚒ Open your dashboard</a>
     <a href="https://hackclub.enterprise.slack.com/archives/C0ALHGAASLV" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Join #pull-quests</a>
     <a href="https://github.com/hackclub/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Browse Repos</a>
   </div>
-  <p class="hero-note">The repos on the GitHub page are the most active ones.</p>
+  <p class="hero-note">Sign in on the dashboard to submit fixes and track your contributions.</p>
 </header>
 
 <div class="tape-divider"></div>
@@ -86,141 +86,8 @@
         <div id="job-listings-container"></div>
     </div>
 </div>
-  <div class="tape-divider"></div>
-
-<div class="section" id="account">
-  <div class="section-inner">
-    <div class="section-label">Hack Club Account</div>
-    <div class="auth-card">
-      <div class="auth-card__copy-wrap">
-        <p class="auth-card__eyebrow">OAuth + Airtable</p>
-        <h2 class="auth-card__title" id="auth-title">Sign in with Hack Club</h2>
-        <p class="auth-card__copy" id="auth-copy">Link your Hack Club account to save your profile and sync it to Airtable.</p>
-      </div>
-      <form action="/api/auth/start" method="post" class="auth-card__form" id="auth-form">
-        <p class="auth-card__status" id="auth-status">Checking session...</p>
-        <button type="submit" class="btn btn-primary auth-card__button" id="auth-button">Link or create Hack Club Account</button>
-      </form>
-    </div>
-  </div>
-</div>
 
   <div class="tape-divider"></div>
-
-<div class="section" id="dashboard">
-    <div class="section-inner section-inner--wide">
-      <div class="dashboard-shell" id="dashboard-shell">
-        <header class="dashboard-hero">
-          <div class="dashboard-hero__topline">
-            <p class="dashboard-hero__eyebrow">Dedicated workspace</p>
-            <div class="dashboard-hero__pills">
-              <span class="dashboard-pill">Stardance-style</span>
-              <span class="dashboard-pill">Airtable-backed</span>
-            </div>
-          </div>
-
-          <div class="dashboard-hero__body">
-            <div class="dashboard-hero__copy">
-              <h2 class="dashboard-title" id="dashboard-title">Sign in to submit a fix</h2>
-              <p class="dashboard-copy" id="dashboard-copy">Once you sign in, this dashboard becomes your workspace for sending fixes, tracking submissions, and keeping everything organized in Airtable.</p>
-            </div>
-
-            <div class="dashboard-hero__meta">
-              <div class="dashboard-stat">
-                <span class="dashboard-stat__label">Status</span>
-                <span class="dashboard-stat__value" id="dashboard-status">Locked</span>
-              </div>
-              <div class="dashboard-stat">
-                <span class="dashboard-stat__label">User</span>
-                <span class="dashboard-stat__value" id="dashboard-user">Guest</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="dashboard-hero__actions">
-            <a href="#account" class="btn btn-outline">Link Account</a>
-            <a href="#jobs" class="btn btn-primary">Browse Work</a>
-          </div>
-        </header>
-
-        <div class="dashboard-grid">
-          <aside class="dashboard-sidebar">
-            <div class="dashboard-panel dashboard-panel--summary">
-              <p class="auth-card__eyebrow">Workspace overview</p>
-              <h3>What you can do here</h3>
-              <ul class="dashboard-checklist">
-                <li>Submit a fix with title, link, repo, and notes.</li>
-                <li>See your latest Airtable submissions on the right.</li>
-                <li>Keep your Hack Club identity synced while you work.</li>
-              </ul>
-            </div>
-
-            <div class="dashboard-panel dashboard-panel--summary dashboard-panel--summary-alt">
-              <p class="auth-card__eyebrow">Quick flow</p>
-              <ol class="dashboard-steps">
-                <li>Sign in with Hack Club.</li>
-                <li>Fill out the submission form.</li>
-                <li>Send it to Airtable.</li>
-              </ol>
-            </div>
-          </aside>
-
-          <div class="dashboard-workspace">
-            <form class="dashboard-panel dashboard-form" id="submission-form">
-              <div class="dashboard-form__header">
-                <p class="auth-card__eyebrow">Submit work</p>
-                <h3>Send a contribution</h3>
-              </div>
-
-              <label class="field">
-                <span>Title</span>
-                <input name="title" type="text" placeholder="Fix sticky nav on Slack homepage" required>
-              </label>
-
-              <label class="field">
-                <span>Link</span>
-                <input name="url" type="url" placeholder="https://github.com/hackclub/example" required>
-              </label>
-
-              <label class="field">
-                <span>Repo / Project</span>
-                <input name="repo" type="text" placeholder="hackclub/slack.hackclub.com" required>
-              </label>
-
-              <label class="field">
-                <span>Notes</span>
-                <textarea name="notes" rows="4" placeholder="What needs to change, what you tried, and any helpful context."></textarea>
-              </label>
-
-              <label class="field">
-                <span>Category</span>
-                <select name="category">
-                  <option value="Bug fix">Bug fix</option>
-                  <option value="Design">Design</option>
-                  <option value="Content">Content</option>
-                  <option value="Infrastructure">Infrastructure</option>
-                  <option value="Other">Other</option>
-                </select>
-              </label>
-
-              <p class="dashboard-form__feedback" id="submission-feedback">Sign in to submit.</p>
-              <button type="submit" class="btn btn-primary dashboard-form__button" id="submission-button" disabled>Submit to Airtable</button>
-            </form>
-
-            <div class="dashboard-panel dashboard-panel--list">
-              <div class="dashboard-form__header">
-                <p class="auth-card__eyebrow">Recent submissions</p>
-                <h3>Your latest items</h3>
-              </div>
-              <div class="dashboard-list" id="submission-list">
-                <p class="dashboard-list__empty">Sign in to see your submissions.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  </div>
-</div>
 
 <div class="section" id="contribute">
   <div class="section-inner">
@@ -252,14 +119,14 @@
       <div class="ticket">
         <div class="ticket-id">STEP-04</div>
         <h3>Get Reviewed</h3>
-        <p>Work with maintainers to polish the PR until it is merged and shipped.Also always follow code of conduct</p>
+        <p>Work with maintainers to polish the PR until it is merged and shipped. Also always follow the code of conduct.</p>
         <div class="ticket-num">04</div>
       </div>
 
     </div>
 
     <div class="btn-row" style="margin-top: 2rem;">
-      <a 
+      <a
         href="https://github.com/hackclub/.github/blob/main/CONTRIBUTING.md"
         target="_blank"
         rel="noopener noreferrer"
@@ -268,13 +135,11 @@
         Read CONTRIBUTING.md
       </a>
 
-      <a 
-        href="https://github.com/hackclub/"
-        target="_blank"
-        rel="noopener noreferrer"
+      <a
+        href="/dashboard"
         class="btn btn-outline"
       >
-        Contribute on GitHub
+        Open Dashboard
       </a>
     </div>
 
@@ -289,7 +154,7 @@
   <span><a href="https://github.com/hackclub" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="https://hackclub.com/slack" target="_blank" rel="noopener noreferrer">Slack</a> · <a href="https://hackclub.com" target="_blank" rel="noopener noreferrer">hackclub.com</a></span>
 </footer>
 
-<script type="module" src="/src/main.js"></script>
+<script type="module" src="/src/landing.js"></script>
 
 </body>
 </html>
