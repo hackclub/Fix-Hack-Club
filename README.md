@@ -4,15 +4,22 @@ A YSWS program associated with PullQuests (for Clubs). Participants submit PRs t
 
 ## Stack
 
-- Vite (vanilla JS), multi-page: a public landing page (`index.html`) and a dedicated dashboard (`dashboard.html`, served at `/dashboard`).
-- Vercel serverless functions in `api/`.
+- Next.js 15 (App Router) + TypeScript, src/ layout.
 - Postgres via Prisma (`prisma/schema.prisma`).
 - Hack Club OAuth with an HMAC-signed session cookie.
 
 ## Pages
 
 - `/` Landing page: hero, how it works, live job listings, and the contribution guide.
-- `/dashboard` Dashboard: gated behind Hack Club sign-in. Submit a fix, track your submissions, and view your profile.
+- `/dashboard` Dashboard: gated behind Hack Club sign-in (the page reads the session cookie server-side). Submit a fix, track your submissions, and view your profile.
+
+## API routes
+
+App Router route handlers under `src/app/api`:
+
+- `GET /api/listings`
+- `GET, POST /api/submissions`
+- `GET /api/auth/start`, `/api/auth/callback`, `/api/auth/me`, `/api/auth/logout`
 
 ## Local Development
 
@@ -24,8 +31,6 @@ npm run db:seed        # load the starter listings from listings.json
 npm run dev
 ```
 
-`npm run dev` runs the same API handlers that ship to Vercel, so local behavior matches production.
-
 ## Environment Variables
 
 - `DATABASE_URL`: Postgres connection string. On serverless, use a pooled connection (for example Neon or Supabase pooler).
@@ -33,6 +38,8 @@ npm run dev
 - `HACKCLUB_CLIENT_ID`, `HACKCLUB_CLIENT_SECRET`: Hack Club OAuth credentials.
 - `HACKCLUB_AUTH_HOST`: Optional, defaults to `https://auth.hackclub.com`.
 - `SESSION_SECRET`: Secret used to sign the session cookie.
+
+The Hack Club OAuth app's redirect URI is `{origin}/api/auth/callback`.
 
 ## Database
 
@@ -44,8 +51,4 @@ The schema lives in `prisma/schema.prisma` with three models: `Listing`, `User`,
 
 ## Deploy (Vercel)
 
-```bash
-npm run build
-```
-
-`prisma generate` runs automatically on `postinstall` and `build`. Set the environment variables above in the Vercel dashboard, and run `prisma migrate deploy` (or `db push`) against your production database.
+Vercel auto-detects Next.js. `prisma generate` runs on `postinstall` and `build`. Set the environment variables above in the Vercel dashboard, and run `prisma migrate deploy` (or `db push`) against your production database.
