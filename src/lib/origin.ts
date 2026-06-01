@@ -7,7 +7,14 @@ import type { NextRequest } from 'next/server';
 export function getOrigin(request: NextRequest): string {
   const configured = process.env.APP_BASE_URL;
   if (configured) {
-    return configured.replace(/\/+$/, '');
+    // Reduce to scheme + host even if APP_BASE_URL accidentally includes a path
+    // (e.g. the callback URL), otherwise the redirect_uri path gets duplicated.
+    const raw = /^https?:\/\//i.test(configured) ? configured : `https://${configured}`;
+    try {
+      return new URL(raw).origin;
+    } catch {
+      return configured.replace(/\/+$/, '');
+    }
   }
 
   const forwardedHost =
