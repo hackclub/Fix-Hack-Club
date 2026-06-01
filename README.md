@@ -52,3 +52,15 @@ The schema lives in `prisma/schema.prisma` with three models: `Listing`, `User`,
 ## Deploy (Vercel)
 
 Vercel auto-detects Next.js. `prisma generate` runs on `postinstall` and `build`. Set the environment variables above in the Vercel dashboard, and run `prisma migrate deploy` (or `db push`) against your production database.
+
+## Deploy (Render, Docker)
+
+The repo ships a multi-stage `Dockerfile` (Next.js standalone output) plus a `render.yaml` blueprint.
+
+1. Create a Render web service from this repo (or use the blueprint). It builds from the `Dockerfile`.
+2. Set the environment variables in the Render dashboard: `DATABASE_URL`, `HACKCLUB_CLIENT_ID`, `HACKCLUB_CLIENT_SECRET`, and `SESSION_SECRET`. `DIRECT_URL` is optional and falls back to `DATABASE_URL` (Render's managed Postgres needs no separate direct connection).
+3. On each start, `docker-entrypoint.sh` applies the schema: `prisma migrate deploy` if `prisma/migrations` exists, otherwise `prisma db push`. Then it starts the standalone server.
+
+Notes:
+- The Hack Club OAuth redirect URI must point at the Render URL: `https://<your-app>.onrender.com/api/auth/callback`.
+- The runtime image copies the full `node_modules` so the Prisma CLI can run migrations at startup. For multi-instance setups, prefer Render's Pre-Deploy Command for migrations and simplify the container start to `node server.js`.

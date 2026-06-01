@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: fix-hack-club
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: HACKCLUB_CLIENT_ID
+        sync: false
+      - key: HACKCLUB_CLIENT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
