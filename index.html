@@ -26,6 +26,8 @@
   <ul class="nav-links" id="main-nav-links">
     <li><a href="#how">How It Works</a></li>
     <li><a href="#jobs">Examples</a></li>
+    <li><a href="#account">Hack Club Account</a></li>
+    <li><a href="#dashboard">Dashboard</a></li>
     <li><a href="https://hackclub.com/slack" target="_blank" rel="noopener noreferrer" class="nav-cta">Join Slack</a></li>
   </ul>
 </nav>
@@ -85,6 +87,140 @@
     </div>
 </div>
   <div class="tape-divider"></div>
+
+<div class="section" id="account">
+  <div class="section-inner">
+    <div class="section-label">Hack Club Account</div>
+    <div class="auth-card">
+      <div class="auth-card__copy-wrap">
+        <p class="auth-card__eyebrow">OAuth + Airtable</p>
+        <h2 class="auth-card__title" id="auth-title">Sign in with Hack Club</h2>
+        <p class="auth-card__copy" id="auth-copy">Link your Hack Club account to save your profile and sync it to Airtable.</p>
+      </div>
+      <form action="/api/auth/start" method="post" class="auth-card__form" id="auth-form">
+        <p class="auth-card__status" id="auth-status">Checking session...</p>
+        <button type="submit" class="btn btn-primary auth-card__button" id="auth-button">Link or create Hack Club Account</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <div class="tape-divider"></div>
+
+<div class="section" id="dashboard">
+    <div class="section-inner section-inner--wide">
+      <div class="dashboard-shell" id="dashboard-shell">
+        <header class="dashboard-hero">
+          <div class="dashboard-hero__topline">
+            <p class="dashboard-hero__eyebrow">Dedicated workspace</p>
+            <div class="dashboard-hero__pills">
+              <span class="dashboard-pill">Stardance-style</span>
+              <span class="dashboard-pill">Airtable-backed</span>
+            </div>
+          </div>
+
+          <div class="dashboard-hero__body">
+            <div class="dashboard-hero__copy">
+              <h2 class="dashboard-title" id="dashboard-title">Sign in to submit a fix</h2>
+              <p class="dashboard-copy" id="dashboard-copy">Once you sign in, this dashboard becomes your workspace for sending fixes, tracking submissions, and keeping everything organized in Airtable.</p>
+            </div>
+
+            <div class="dashboard-hero__meta">
+              <div class="dashboard-stat">
+                <span class="dashboard-stat__label">Status</span>
+                <span class="dashboard-stat__value" id="dashboard-status">Locked</span>
+              </div>
+              <div class="dashboard-stat">
+                <span class="dashboard-stat__label">User</span>
+                <span class="dashboard-stat__value" id="dashboard-user">Guest</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-hero__actions">
+            <a href="#account" class="btn btn-outline">Link Account</a>
+            <a href="#jobs" class="btn btn-primary">Browse Work</a>
+          </div>
+        </header>
+
+        <div class="dashboard-grid">
+          <aside class="dashboard-sidebar">
+            <div class="dashboard-panel dashboard-panel--summary">
+              <p class="auth-card__eyebrow">Workspace overview</p>
+              <h3>What you can do here</h3>
+              <ul class="dashboard-checklist">
+                <li>Submit a fix with title, link, repo, and notes.</li>
+                <li>See your latest Airtable submissions on the right.</li>
+                <li>Keep your Hack Club identity synced while you work.</li>
+              </ul>
+            </div>
+
+            <div class="dashboard-panel dashboard-panel--summary dashboard-panel--summary-alt">
+              <p class="auth-card__eyebrow">Quick flow</p>
+              <ol class="dashboard-steps">
+                <li>Sign in with Hack Club.</li>
+                <li>Fill out the submission form.</li>
+                <li>Send it to Airtable.</li>
+              </ol>
+            </div>
+          </aside>
+
+          <div class="dashboard-workspace">
+            <form class="dashboard-panel dashboard-form" id="submission-form">
+              <div class="dashboard-form__header">
+                <p class="auth-card__eyebrow">Submit work</p>
+                <h3>Send a contribution</h3>
+              </div>
+
+              <label class="field">
+                <span>Title</span>
+                <input name="title" type="text" placeholder="Fix sticky nav on Slack homepage" required>
+              </label>
+
+              <label class="field">
+                <span>Link</span>
+                <input name="url" type="url" placeholder="https://github.com/hackclub/example" required>
+              </label>
+
+              <label class="field">
+                <span>Repo / Project</span>
+                <input name="repo" type="text" placeholder="hackclub/slack.hackclub.com" required>
+              </label>
+
+              <label class="field">
+                <span>Notes</span>
+                <textarea name="notes" rows="4" placeholder="What needs to change, what you tried, and any helpful context."></textarea>
+              </label>
+
+              <label class="field">
+                <span>Category</span>
+                <select name="category">
+                  <option value="Bug fix">Bug fix</option>
+                  <option value="Design">Design</option>
+                  <option value="Content">Content</option>
+                  <option value="Infrastructure">Infrastructure</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+
+              <p class="dashboard-form__feedback" id="submission-feedback">Sign in to submit.</p>
+              <button type="submit" class="btn btn-primary dashboard-form__button" id="submission-button" disabled>Submit to Airtable</button>
+            </form>
+
+            <div class="dashboard-panel dashboard-panel--list">
+              <div class="dashboard-form__header">
+                <p class="auth-card__eyebrow">Recent submissions</p>
+                <h3>Your latest items</h3>
+              </div>
+              <div class="dashboard-list" id="submission-list">
+                <p class="dashboard-list__empty">Sign in to see your submissions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
 
 <div class="section" id="contribute">
   <div class="section-inner">
