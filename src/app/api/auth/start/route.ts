@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { config } from '@/lib/config';
 import { buildAuthUrl, createState } from '@/lib/hackclub';
+import { getOrigin } from '@/lib/origin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const origin = request.nextUrl.origin;
+  const origin = getOrigin(request);
   const state = createState();
   const loginHint = request.nextUrl.searchParams.get('login_hint') || '';
   const authUrl = buildAuthUrl({ origin, state, loginHint });

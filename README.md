@@ -38,8 +38,9 @@ npm run dev
 - `HACKCLUB_CLIENT_ID`, `HACKCLUB_CLIENT_SECRET`: Hack Club OAuth credentials.
 - `HACKCLUB_AUTH_HOST`: Optional, defaults to `https://auth.hackclub.com`.
 - `SESSION_SECRET`: Secret used to sign the session cookie.
+- `APP_BASE_URL`: Optional but recommended in production. The public origin with no trailing slash (e.g. `https://your-app.onrender.com`). Used to build the OAuth `redirect_uri`. Without it the app derives the origin from `x-forwarded-proto` / `x-forwarded-host`.
 
-The Hack Club OAuth app's redirect URI is `{origin}/api/auth/callback`.
+The OAuth `redirect_uri` is `<origin>/api/auth/callback`. It must be registered EXACTLY in your Hack Club OAuth app (same scheme and host, no trailing slash). Behind a TLS proxy the scheme must be `https`, so set `APP_BASE_URL` if the auto-detected origin is ever wrong.
 
 ## Database
 

@@ -7,6 +7,7 @@ import {
   fetchHackClubProfile,
   normalizeHackClubProfile,
 } from '@/lib/hackclub';
+import { getOrigin } from '@/lib/origin';
 import type { HackClubProfile } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -32,7 +33,7 @@ async function upsertUser(profile: HackClubProfile) {
 }
 
 export async function GET(request: NextRequest) {
-  const origin = request.nextUrl.origin;
+  const origin = getOrigin(request);
   const state = request.nextUrl.searchParams.get('state') || '';
   const code = request.nextUrl.searchParams.get('code') || '';
   const storedState = request.cookies.get(config.oauthStateCookieName)?.value || '';

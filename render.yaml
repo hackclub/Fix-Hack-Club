@@ -6,6 +6,8 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /
     envVars:
+      - key: APP_BASE_URL
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL
