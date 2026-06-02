@@ -25,6 +25,17 @@ export default async function ShipsPage() {
     take: 10,
   });
 
+  // Count each leader's shipped (approved) fixes for the leaderboard.
+  const leaderIds = leaders.map((u) => u.hackClubId);
+  const shipCounts = leaderIds.length
+    ? await prisma.submission.groupBy({
+        by: ['hackClubId'],
+        where: { status: 'Approved', hackClubId: { in: leaderIds } },
+        _count: { _all: true },
+      })
+    : [];
+  const shipsByHackClubId = new Map(shipCounts.map((c) => [c.hackClubId, c._count._all]));
+
   return (
     <div className="dash-body">
       <div className="caution-tape"></div>
@@ -84,15 +95,23 @@ export default async function ShipsPage() {
                 <p className="dashboard-list__empty">No points awarded yet.</p>
               ) : (
                 <ol className="leaderboard">
-                  {leaders.map((u, i) => (
-                    <li className="leaderboard__row" key={u.id}>
-                      <span className="leaderboard__rank">{i + 1}</span>
-                      <Link className="leaderboard__name" href={`/u/${u.id}`}>
-                        {u.displayName || 'Member'}
-                      </Link>
-                      <span className="leaderboard__pts">{formatPoints(u.totalEarned)}</span>
-                    </li>
-                  ))}
+                  {leaders.map((u, i) => {
+                    const ships = shipsByHackClubId.get(u.hackClubId) ?? 0;
+                    return (
+                      <li className="leaderboard__row" key={u.id}>
+                        <span className="leaderboard__rank">{i + 1}</span>
+                        <div className="leaderboard__person">
+                          <Link className="leaderboard__name" href={`/u/${u.id}`}>
+                            {u.displayName || 'Member'}
+                          </Link>
+                          <span className="leaderboard__sub">
+                            {ships} {ships === 1 ? 'ship' : 'ships'}
+                          </span>
+                        </div>
+                        <span className="leaderboard__pts">{formatPoints(u.totalEarned)} pts</span>
+                      </li>
+                    );
+                  })}
                 </ol>
               )}
             </div>

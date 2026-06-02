@@ -363,9 +363,11 @@ footer a:hover { color: hsl(var(--primary)); }
 .leaderboard__row:nth-child(1) .leaderboard__rank { color: hsl(47 100% 62%); }
 .leaderboard__row:nth-child(2) .leaderboard__rank { color: hsl(240 6% 74%); }
 .leaderboard__row:nth-child(3) .leaderboard__rank { color: hsl(30 80% 56%); }
-.leaderboard__name { flex: 1; color: hsl(var(--foreground)); text-decoration: none; font-weight: 500; }
+.leaderboard__person { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.leaderboard__name { color: hsl(var(--foreground)); text-decoration: none; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .leaderboard__name:hover { color: hsl(var(--primary)); }
-.leaderboard__pts { font-weight: 700; font-family: var(--font-display); }
+.leaderboard__sub { font-family: var(--font-mono); font-size: 11px; color: hsl(var(--muted-foreground)); }
+.leaderboard__pts { font-weight: 700; font-family: var(--font-display); white-space: nowrap; }
 
 /* ---------- Points ledger ---------- */
 .ledger { display: grid; gap: 2px; }
