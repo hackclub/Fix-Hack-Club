@@ -406,6 +406,17 @@ footer a:hover { color: hsl(var(--primary)); }
 .admin-form--bordered { border-top: 1px solid hsl(var(--border)); padding-top: 19px; margin-top: 19px; }
 .admin-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
 
+/* Collapsible admin item (native <details>): name + Edit affordance, form on expand */
+.admin-collapse { border: 2px solid hsl(var(--border)); background: hsl(var(--surface)); border-radius: calc(var(--radius) - 2px); margin-top: 10px; overflow: hidden; }
+.admin-collapse[open] { border-color: hsl(var(--primary) / 0.45); }
+.admin-collapse__summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; transition: background .15s; }
+.admin-collapse__summary::-webkit-details-marker { display: none; }
+.admin-collapse__summary:hover { background: hsl(var(--accent) / 0.5); }
+.admin-collapse__title { font-family: var(--font-display); font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-collapse__meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.admin-collapse__edit { pointer-events: none; }
+.admin-collapse__form { padding: 4px 16px 18px; }
+
 /* ---------- Badges ---------- */
 .status-badge { font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.02em; font-size: 11.5px; padding: 4px 11px; border-radius: 999px; border: 1.5px solid transparent; white-space: nowrap; }
 .status-draft { background: hsl(var(--secondary)); color: hsl(var(--muted-foreground)); border-color: hsl(var(--border)); }

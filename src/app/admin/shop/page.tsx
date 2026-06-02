@@ -41,23 +41,40 @@ export default async function AdminShop() {
           <h3>{items.length} item(s)</h3>
         </div>
 
-        {items.map((item) => (
-          <form action={updateShopItemAction} className="admin-form admin-form--bordered" key={item.id}>
-            <input type="hidden" name="id" value={item.id} />
-            <label className="field"><span>Name</span><input name="name" defaultValue={item.name} /></label>
-            <label className="field"><span>Description</span><textarea name="description" rows={2} defaultValue={item.description} /></label>
-            <label className="field"><span>Image URL</span><input name="imageUrl" defaultValue={item.imageUrl ?? ''} /></label>
-            <div className="admin-form__row">
-              <label className="field"><span>Cost</span><input name="cost" type="number" min={0} defaultValue={item.cost} /></label>
-              <label className="field"><span>Stock</span><input name="stock" type="number" min={0} defaultValue={item.stock ?? ''} /></label>
-            </div>
-            <label className="checkbox-field"><input type="checkbox" name="active" defaultChecked={item.active} /> <span>Active</span></label>
-            <div className="admin-row__actions">
-              <button type="submit" className="btn btn-primary btn-sm" formAction={updateShopItemAction}>Save</button>
-              <button type="submit" className="btn btn-outline btn-sm" formAction={deleteShopItemAction}>Delete</button>
-            </div>
-          </form>
-        ))}
+        {items.length === 0 ? (
+          <p className="dashboard-list__empty">No items yet.</p>
+        ) : (
+          items.map((item) => (
+            <details className="admin-collapse" key={item.id}>
+              <summary className="admin-collapse__summary">
+                <span className="admin-collapse__title">
+                  {item.name}
+                  {!item.active ? <span className="status-badge status-rejected">Hidden</span> : null}
+                </span>
+                <span className="admin-collapse__meta">
+                  <span className="balance-pill">{item.cost} pts</span>
+                  <span className="btn btn-outline btn-sm admin-collapse__edit">Edit</span>
+                </span>
+              </summary>
+
+              <form action={updateShopItemAction} className="admin-form admin-collapse__form">
+                <input type="hidden" name="id" value={item.id} />
+                <label className="field"><span>Name</span><input name="name" defaultValue={item.name} /></label>
+                <label className="field"><span>Description</span><textarea name="description" rows={2} defaultValue={item.description} /></label>
+                <label className="field"><span>Image URL</span><input name="imageUrl" defaultValue={item.imageUrl ?? ''} /></label>
+                <div className="admin-form__row">
+                  <label className="field"><span>Cost</span><input name="cost" type="number" min={0} defaultValue={item.cost} /></label>
+                  <label className="field"><span>Stock</span><input name="stock" type="number" min={0} defaultValue={item.stock ?? ''} /></label>
+                </div>
+                <label className="checkbox-field"><input type="checkbox" name="active" defaultChecked={item.active} /> <span>Active</span></label>
+                <div className="admin-row__actions">
+                  <button type="submit" className="btn btn-primary btn-sm" formAction={updateShopItemAction}>Save</button>
+                  <button type="submit" className="btn btn-outline btn-sm" formAction={deleteShopItemAction}>Delete</button>
+                </div>
+              </form>
+            </details>
+          ))
+        )}
       </section>
     </>
   );
