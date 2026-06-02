@@ -84,18 +84,18 @@ export default async function Home() {
                 <div className={`ticketA${listing.status === 'finished' ? ' finished' : ''}`} key={listing.id}>
                   <div className="ticket-idA">{listing.id}</div>
                   <h3>
-                    <a href={listing.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#ffffff' }}>
+                    <a href={listing.url} target="_blank" rel="noopener noreferrer">
                       {listing.title}
                     </a>
                   </h3>
                   <p>{listing.description}</p>
                   <br />
-                  <ul style={{ fontSize: 25 }}>
+                  <ul>
                     {listing.requirements.map((req, index) => (
                       <li key={index}>{req}</li>
                     ))}
                   </ul>
-                  <div className="btn-row" style={{ marginTop: 50 }}>
+                  <div className="btn-row">
                     <a href={listing.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
                       Page Link
                     </a>

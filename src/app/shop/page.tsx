@@ -112,7 +112,7 @@ export default async function ShopPage({
                   <article className="dashboard-list__item" key={order.id}>
                     <div className="dashboard-list__item-head">
                       <h4>{order.itemName}</h4>
-                      <span>{order.status}</span>
+                      <span className={`status-badge status-${order.status}`}>{order.status}</span>
                     </div>
                     <p>
                       {order.cost} pts
