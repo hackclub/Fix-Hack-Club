@@ -81,7 +81,7 @@ export default async function FindWorkPage() {
           </div>
           <div className="btn-row">
             <a
-              href="https://hackclub.com/slack"
+              href="https://hackclub.enterprise.slack.com/team/U08J9R1TUT1"
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-primary"
