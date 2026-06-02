@@ -220,7 +220,7 @@ footer a:hover { color: hsl(var(--primary)); }
 .dash-main { display: grid; gap: 22px; min-width: 0; }
 .dash-main section[id] { scroll-margin-top: 84px; }
 
-.dash-pagehead { display: flex; align-items: end; justify-content: space-between; gap: 22px; flex-wrap: wrap; }
+.dash-pagehead { display: flex; align-items: flex-end; justify-content: space-between; gap: 22px; flex-wrap: wrap; }
 .dash-pagehead__copy { display: grid; gap: 6px; }
 .dashboard-title { font-size: clamp(26px, 4vw, 38px); }
 .dashboard-copy { color: hsl(var(--muted-foreground)); max-width: 62ch; }
@@ -353,7 +353,7 @@ footer a:hover { color: hsl(var(--primary)); }
   border-left-color: hsl(var(--primary) / 0.65);
   box-shadow: 0 8px 24px hsl(var(--primary) / 0.07);
 }
-.feed-item__head { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.feed-item__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .feed-item__title { font-size: 19px; }
 .feed-item__title a { color: hsl(var(--foreground)); text-decoration: none; }
 .feed-item__title a:hover { color: hsl(var(--primary)); }
@@ -387,7 +387,7 @@ footer a:hover { color: hsl(var(--primary)); }
 .admin-card__value { font-weight: 700; font-size: 34px; color: hsl(var(--primary)); line-height: 1; }
 .admin-card__label { color: hsl(var(--muted-foreground)); font-size: 13px; }
 .admin-rows { display: grid; gap: 10px; }
-.admin-row { display: flex; align-items: start; justify-content: space-between; gap: 16px; border: 1px solid hsl(var(--border)); background: hsl(var(--background)); border-radius: calc(var(--radius) - 2px); padding: 15px; flex-wrap: wrap; }
+.admin-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; border: 1px solid hsl(var(--border)); background: hsl(var(--background)); border-radius: calc(var(--radius) - 2px); padding: 15px; flex-wrap: wrap; }
 .admin-row__main { flex: 1; min-width: 220px; display: grid; gap: 5px; }
 .admin-row__main h4 { font-size: 16px; }
 .admin-row__meta { font-size: 13px; color: hsl(var(--muted-foreground)); }
