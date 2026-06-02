@@ -28,8 +28,8 @@ export default function Home() {
           Submit PRs to improve Hack Club&apos;s infra. Fix CSS, add pages to YSWS programs, or anything else approved by the program managers — and earn points for your time.
         </p>
         <div className="btn-row">
-          <a href="/projects" className="btn btn-primary">
-            ⚒ Browse projects
+          <a href="/find" className="btn btn-primary">
+            ⚒ Find work
           </a>
           <a
             href="https://hackclub.enterprise.slack.com/archives/C0ALHGAASLV"
@@ -72,7 +72,7 @@ export default function Home() {
               <p>Pick an open project, open a PR, and log your work. New here? Read the contribution guide first.</p>
             </div>
             <div className="btn-row">
-              <a href="/projects" className="btn btn-primary">See open projects</a>
+              <a href="/find" className="btn btn-primary">See open projects</a>
               <a
                 href="https://github.com/hackclub/.github/blob/main/CONTRIBUTING.md"
                 target="_blank"

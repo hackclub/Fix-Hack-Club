@@ -92,7 +92,8 @@ export default async function AccountPage() {
             </div>
           </div>
           <div className="btn-row">
-            <Link href="/projects/submit" className="btn btn-primary">⚒ Submit a fix</Link>
+            <Link href="/projects" className="btn btn-primary">Your projects</Link>
+            <Link href="/projects/submit" className="btn btn-outline">⚒ Submit a fix</Link>
           </div>
         </div>
 
@@ -127,47 +128,6 @@ export default async function AccountPage() {
               ))}
             </div>
           )}
-        </section>
-
-        <section className="dashboard-panel dashboard-panel--list" style={{ marginTop: 22 }}>
-          <div className="dashboard-form__header">
-            <p className="auth-card__eyebrow">History</p>
-            <h3>My submissions</h3>
-          </div>
-          <div className="dashboard-list">
-            {submissions.length === 0 ? (
-              <p className="dashboard-list__empty">
-                No submissions yet. <Link href="/projects/submit">Submit your first fix.</Link>
-              </p>
-            ) : (
-              submissions.map((s) => (
-                <article className="dashboard-list__item" key={s.id}>
-                  <div className="dashboard-list__item-head">
-                    <h4>{s.title}</h4>
-                    <span className={`status-badge status-${s.status.toLowerCase()}`}>
-                      {s.status}
-                      {s.status === 'Approved' && s.pointsAwarded ? ` · +${s.pointsAwarded}` : ''}
-                    </span>
-                  </div>
-                  <p>
-                    {s.category}
-                    {s.repo ? ` · ${s.repo}` : ''}
-                    {s.hackatimeProject ? ` · ${secondsToHours(s.loggedSeconds)}h logged` : ''}
-                    {s.hackatimeProject && s.status === 'Submitted' ? ` · ${secondsToPoints(s.loggedSeconds)} pending` : ''}
-                  </p>
-                  {s.notes ? <p>{s.notes}</p> : null}
-                  {s.status === 'Rejected' && s.reviewNote ? (
-                    <p className="flash flash--error">Reason: {s.reviewNote}</p>
-                  ) : null}
-                  <p>
-                    <Link href={`/projects/${s.id}`}>
-                      {s.status === 'Draft' ? 'Open draft → submit for review' : 'View project / post devlog'}
-                    </Link>
-                  </p>
-                </article>
-              ))
-            )}
-          </div>
         </section>
       </main>
 

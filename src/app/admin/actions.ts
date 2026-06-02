@@ -85,7 +85,7 @@ export async function createListingAction(formData: FormData) {
     },
   });
   revalidatePath('/admin/listings');
-  revalidatePath('/projects');
+  revalidatePath('/find');
   revalidatePath('/');
 }
 
@@ -106,7 +106,7 @@ export async function updateListingAction(formData: FormData) {
     },
   });
   revalidatePath('/admin/listings');
-  revalidatePath('/projects');
+  revalidatePath('/find');
   revalidatePath('/');
 }
 
@@ -114,7 +114,7 @@ export async function deleteListingAction(formData: FormData) {
   await requireAdmin();
   await prisma.listing.delete({ where: { id: str(formData, 'id') } });
   revalidatePath('/admin/listings');
-  revalidatePath('/projects');
+  revalidatePath('/find');
   revalidatePath('/');
 }
 
