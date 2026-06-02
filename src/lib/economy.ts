@@ -97,8 +97,16 @@ export async function adjustBalance(userId: string, delta: number, reason: strin
 }
 
 // Member redeems a shop item: validate stock + balance, spend points, create order.
+//
+// The balance and stock deductions use conditional UPDATE statements (via
+// Prisma's updateMany with a where filter) so that concurrent requests cannot
+// race past the checks.  Each translates to a single atomic SQL UPDATE … WHERE
+// that PostgreSQL executes with row-level locking — eliminating the double-spend
+// and oversell race conditions that a read-then-write pattern would allow.
 export async function redeemItem(userId: string, itemId: string) {
   await prisma.$transaction(async (tx) => {
+    // Read the item first for early, user-friendly error messages and to get the
+    // cost/name values needed for the ledger entry and order record.
     const item = await tx.shopItem.findUnique({ where: { id: itemId } });
     if (!item || !item.active) {
       throw new Error('This item is not available.');
@@ -107,19 +115,33 @@ export async function redeemItem(userId: string, itemId: string) {
       throw new Error('This item is out of stock.');
     }
 
-    const user = await tx.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      throw new Error('User not found.');
-    }
-    if (user.balance < item.cost) {
+    // Atomically deduct the balance. The WHERE balance >= cost guard prevents
+    // overdraft even under concurrent requests — this is a single UPDATE … WHERE
+    // statement that Postgres executes with row-level locking.
+    const deducted = await tx.user.updateMany({
+      where: { id: userId, balance: { gte: item.cost } },
+      data: { balance: { decrement: item.cost } },
+    });
+    if (deducted.count === 0) {
+      // 0 rows updated: either the user does not exist or has insufficient balance.
+      const exists = await tx.user.findUnique({ where: { id: userId }, select: { id: true } });
+      if (!exists) throw new Error('User not found.');
       throw new Error('You do not have enough points for this item.');
     }
 
-    await tx.user.update({ where: { id: userId }, data: { balance: { decrement: item.cost } } });
     await tx.ledgerEntry.create({ data: { userId, delta: -item.cost, reason: `Shop: ${item.name}` } });
 
+    // Atomically decrement stock. If another request claimed the last unit
+    // between our initial read and this write, the UPDATE returns 0 rows and we
+    // throw — the transaction rolls back, restoring the balance deducted above.
     if (item.stock !== null) {
-      await tx.shopItem.update({ where: { id: itemId }, data: { stock: { decrement: 1 } } });
+      const stocked = await tx.shopItem.updateMany({
+        where: { id: itemId, active: true, stock: { gt: 0 } },
+        data: { stock: { decrement: 1 } },
+      });
+      if (stocked.count === 0) {
+        throw new Error('This item just sold out. Your points have not been charged.');
+      }
     }
 
     await tx.shopOrder.create({
