@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
+import { secondsToHours } from '@/lib/hackatime';
 import { getSessionProfile } from '@/lib/session';
 
 export const runtime = 'nodejs';
@@ -45,13 +46,12 @@ export default async function MySubmissions() {
                 <p>
                   {s.category}
                   {s.repo ? ` · ${s.repo}` : ''}
+                  {s.hackatimeProject ? ` · ${secondsToHours(s.loggedSeconds)}h logged` : ''}
                 </p>
                 {s.notes ? <p>{s.notes}</p> : null}
-                {s.url ? (
-                  <a href={s.url} target="_blank" rel="noopener noreferrer">
-                    Open link
-                  </a>
-                ) : null}
+                <p>
+                  <Link href={`/projects/${s.id}`}>View project / post devlog</Link>
+                </p>
               </article>
             ))
           )}

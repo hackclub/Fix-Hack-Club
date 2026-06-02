@@ -22,7 +22,7 @@ export async function submitFixAction(formData: FormData) {
     redirect(`/dashboard/submit?error=${encodeURIComponent('Title, link, and repo are required.')}`);
   }
 
-  await prisma.submission.create({
+  const created = await prisma.submission.create({
     data: {
       hackClubId: profile.id,
       email: profile.email || '',
@@ -39,5 +39,5 @@ export async function submitFixAction(formData: FormData) {
 
   revalidatePath('/dashboard/submissions');
   revalidatePath('/dashboard');
-  redirect('/dashboard/submissions');
+  redirect(`/projects/${created.id}`);
 }

@@ -50,13 +50,7 @@ export default async function ExplorePage() {
                     <article className="feed-item" key={s.id}>
                       <div className="feed-item__head">
                         <h3 className="feed-item__title">
-                          {s.url ? (
-                            <a href={s.url} target="_blank" rel="noopener noreferrer">
-                              {s.title}
-                            </a>
-                          ) : (
-                            s.title
-                          )}
+                          <Link href={`/projects/${s.id}`}>{s.title}</Link>
                         </h3>
                         <span className="balance-pill">+{s.pointsAwarded} pts</span>
                       </div>
@@ -72,6 +66,7 @@ export default async function ExplorePage() {
                             s.displayName || 'Member'
                           )}
                         </span>
+                        <Link href={`/projects/${s.id}`}>View project</Link>
                       </div>
                     </article>
                   );

@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { prisma } from '@/lib/db';
+import { secondsToHours } from '@/lib/hackatime';
 import { approveSubmissionAction, rejectSubmissionAction } from '../actions';
 
 export const runtime = 'nodejs';
@@ -8,6 +10,7 @@ export default async function AdminSubmissions() {
   const pending = await prisma.submission.findMany({
     where: { status: 'Submitted' },
     orderBy: { createdAt: 'asc' },
+    include: { _count: { select: { devlogs: true } } },
   });
 
   const reviewed = await prisma.submission.findMany({
@@ -47,14 +50,18 @@ export default async function AdminSubmissions() {
                   {s.notes ? <p className="admin-row__notes">{s.notes}</p> : null}
                   {s.hackatimeProject ? (
                     <p className="admin-row__meta">
-                      Hackatime: <strong>{s.hackatimeProject}</strong> · points auto-computed from tracked hours
+                      Hackatime: <strong>{s.hackatimeProject}</strong> · {secondsToHours(s.loggedSeconds)}h logged ({s._count.devlogs} devlog{s._count.devlogs === 1 ? '' : 's'}) · pays {Math.floor(s.loggedSeconds / 3600)} pts
                     </p>
                   ) : null}
-                  {s.url ? (
-                    <a href={s.url} target="_blank" rel="noopener noreferrer">
-                      Open link
-                    </a>
-                  ) : null}
+                  <p className="admin-row__meta">
+                    <Link href={`/projects/${s.id}`}>Open project</Link>
+                    {s.url ? (
+                      <>
+                        {' · '}
+                        <a href={s.url} target="_blank" rel="noopener noreferrer">Open link</a>
+                      </>
+                    ) : null}
+                  </p>
                 </div>
                 <div className="admin-row__actions">
                   <form action={approveSubmissionAction} className="inline-form">

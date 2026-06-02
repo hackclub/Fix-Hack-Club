@@ -77,14 +77,31 @@ model Submission {
   status       String    @default("Submitted")
   pointsAwarded Int      @default(0) @map("points_awarded")
   hackatimeProject String? @map("hackatime_project")
+  loggedSeconds Int      @default(0) @map("logged_seconds")
   reviewedAt   DateTime? @map("reviewed_at")
   reviewedById String?   @map("reviewed_by_id")
   createdAt    DateTime  @default(now()) @map("created_at")
+
+  devlogs Devlog[]
 
   @@index([hackClubId])
   @@index([email])
   @@index([status])
   @@map("submissions")
+}
+
+model Devlog {
+  id           String   @id @default(cuid())
+  submissionId String   @map("submission_id")
+  hackClubId   String   @map("hack_club_id")
+  text         String
+  seconds      Int      @default(0)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("devlogs")
 }
 
 model LedgerEntry {

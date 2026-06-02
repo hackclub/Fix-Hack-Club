@@ -13,7 +13,7 @@ import {
   rejectSubmission,
 } from '@/lib/economy';
 import { readSessionValue } from '@/lib/hackclub';
-import { fetchHackatimeProjectSeconds, secondsToPoints } from '@/lib/hackatime';
+import { secondsToPoints } from '@/lib/hackatime';
 import type { HackClubProfile } from '@/lib/types';
 
 async function requireAdmin(): Promise<HackClubProfile> {
@@ -45,12 +45,9 @@ export async function approveSubmissionAction(formData: FormData) {
   const submission = await prisma.submission.findUnique({ where: { id } });
   let points = int(formData, 'points', 0);
 
+  // Points come from logged (devlogged) time only: 1 per hour of loggedSeconds.
   if (submission?.hackatimeProject) {
-    const author = await prisma.user.findUnique({ where: { hackClubId: submission.hackClubId } });
-    if (author?.hackatimeUserId) {
-      const seconds = await fetchHackatimeProjectSeconds(author.hackatimeUserId, submission.hackatimeProject);
-      points = secondsToPoints(seconds);
-    }
+    points = secondsToPoints(submission.loggedSeconds);
   }
 
   await approveSubmission(id, points, admin.id);

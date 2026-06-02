@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
@@ -72,11 +73,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
                     {s.category}
                     {s.repo ? ` · ${s.repo}` : ''}
                   </p>
-                  {s.url ? (
-                    <a href={s.url} target="_blank" rel="noopener noreferrer">
-                      Open link
-                    </a>
-                  ) : null}
+                  <Link href={`/projects/${s.id}`}>View project</Link>
                 </article>
               ))
             )}
