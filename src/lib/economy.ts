@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from './db';
 
 // Approve a submission and award points: bump the author's balance + lifetime
@@ -82,14 +83,13 @@ export async function adjustBalance(userId: string, delta: number, reason: strin
     return;
   }
 
+  const data: Prisma.UserUpdateInput = { balance: { increment: amount } };
+  if (amount > 0) {
+    data.totalEarned = { increment: amount };
+  }
+
   await prisma.$transaction(async (tx) => {
-    await tx.user.update({
-      where: { id: userId },
-      data: {
-        balance: { increment: amount },
-        ...(amount > 0 ? { totalEarned: { increment: amount } } : {}),
-      },
-    });
+    await tx.user.update({ where: { id: userId }, data });
     await tx.ledgerEntry.create({
       data: { userId, delta: amount, reason: reason || 'Admin adjustment' },
     });

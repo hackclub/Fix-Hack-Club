@@ -1386,3 +1386,29 @@ footer a:hover { color: #f1c40f; }
   .admin-form__row { grid-template-columns: 1fr; }
   .note-input { width: 100%; }
 }
+
+/* Settings / Auth ID */
+.auth-id-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.auth-id {
+  font-family: 'Roboto Mono', monospace;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(241, 196, 15, 0.18);
+  color: #f1c40f;
+  padding: 4px 10px;
+  word-break: break-all;
+}
+.settings-hint {
+  margin-top: 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.settings-hint code {
+  font-family: 'Roboto Mono', monospace;
+  color: #f1c40f;
+}

@@ -17,6 +17,9 @@ export default async function SiteHeader() {
         {profile ? (
           <Link className="dash-topbar__link" href="/dashboard">Dashboard</Link>
         ) : null}
+        {profile ? (
+          <Link className="dash-topbar__link" href="/settings">Settings</Link>
+        ) : null}
         {admin ? (
           <Link className="dash-topbar__link" href="/admin">Admin</Link>
         ) : null}

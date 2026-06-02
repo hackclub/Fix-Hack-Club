@@ -63,6 +63,7 @@ export default async function DashboardPage() {
         <div className="dash-topbar__right">
           <Link className="dash-topbar__link" href="/explore">Explore</Link>
           <Link className="dash-topbar__link" href="/shop">Shop</Link>
+          <Link className="dash-topbar__link" href="/settings">Settings</Link>
           {admin ? <Link className="dash-topbar__link" href="/admin">Admin</Link> : null}
           <div className="dash-user">
             {profile.avatar ? (

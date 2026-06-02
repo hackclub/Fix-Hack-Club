@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Role } from '@prisma/client';
 import { config } from '@/lib/config';
 import { prisma } from '@/lib/db';
 import {
@@ -23,7 +24,7 @@ async function upsertUser(profile: HackClubProfile) {
     slackId: profile.slack_id || null,
     verificationStatus: profile.verification_status || null,
     avatar: profile.avatar || null,
-    role: (isAdminId(profile.id) ? 'ADMIN' : 'MEMBER') as const,
+    role: isAdminId(profile.id) ? Role.ADMIN : Role.MEMBER,
     lastSignedInAt: new Date(),
   };
 
