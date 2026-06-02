@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import SiteHeader from '@/components/SiteHeader';
 import SideNav from '@/components/SideNav';
 import { isAdminId } from '@/lib/admin';
 import { getSessionProfile } from '@/lib/session';
@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const profile = await getSessionProfile();
 
   if (!profile) {
-    redirect('/dashboard');
+    redirect('/api/auth/start');
   }
   if (!isAdminId(profile.id)) {
     redirect('/');
@@ -33,14 +33,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <div className="dash-body">
       <div className="caution-tape"></div>
 
-      <header className="dash-topbar">
-        <Link className="nav-brand" href="/">⚙ FixHC</Link>
-        <div className="dash-topbar__right">
-          <span className="balance-pill">Admin</span>
-          <Link className="dash-topbar__link" href="/dashboard">Dashboard</Link>
-          <a className="btn btn-outline dash-user__signout" href="/api/auth/logout">Sign out</a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="dash-shell">
         <div className="dash-layout">

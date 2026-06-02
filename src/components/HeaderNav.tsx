@@ -1,0 +1,35 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const LINKS = [
+  { href: '/projects', label: 'Projects' },
+  { href: '/ships', label: 'Ships' },
+  { href: '/shop', label: 'Shop' },
+];
+
+// Primary navigation links with active-route highlighting. Rendered inside the
+// server-side SiteHeader so the right-hand session UI stays server-rendered.
+export default function HeaderNav({ admin = false }: { admin?: boolean }) {
+  const pathname = usePathname();
+  const items = admin ? [...LINKS, { href: '/admin', label: 'Admin' }] : LINKS;
+
+  return (
+    <nav className="site-nav" aria-label="Primary">
+      {items.map((item) => {
+        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`dash-topbar__link${active ? ' is-active' : ''}`}
+            aria-current={active ? 'page' : undefined}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}

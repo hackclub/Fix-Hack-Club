@@ -24,7 +24,7 @@ export default async function SettingsPage({
 }) {
   const profile = await getSessionProfile();
   if (!profile) {
-    redirect('/dashboard');
+    redirect('/api/auth/start');
   }
 
   const sp = await searchParams;

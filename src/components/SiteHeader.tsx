@@ -1,35 +1,45 @@
 import Link from 'next/link';
 import { isAdminId } from '@/lib/admin';
 import { getDbUser, getSessionProfile } from '@/lib/session';
+import HeaderNav from './HeaderNav';
 
-// Shared chrome for the public/app pages (explore, shop, profile).
+// The single shared header used on every page. Reads the session server-side
+// and delegates active-link highlighting to the HeaderNav client component.
 export default async function SiteHeader() {
   const profile = await getSessionProfile();
   const user = profile ? await getDbUser() : null;
   const admin = isAdminId(profile?.id);
+  const displayName = profile?.display_name || profile?.first_name || profile?.email || 'Member';
 
   return (
     <header className="dash-topbar">
-      <Link className="nav-brand" href="/">⚙ FixHC</Link>
+      <Link className="nav-brand" href="/">
+        <span aria-hidden="true">⚙</span> FixHC
+      </Link>
+
+      <HeaderNav admin={admin} />
+
       <div className="dash-topbar__right">
-        <Link className="dash-topbar__link" href="/explore">Explore</Link>
-        <Link className="dash-topbar__link" href="/shop">Shop</Link>
-        {profile ? (
-          <Link className="dash-topbar__link" href="/dashboard">Dashboard</Link>
+        {user ? (
+          <Link className="balance-pill" href="/account">
+            {user.balance} pts
+          </Link>
         ) : null}
         {profile ? (
-          <Link className="dash-topbar__link" href="/settings">Settings</Link>
+          <Link className="dash-user" href="/account">
+            {profile.avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="dash-user__avatar" src={profile.avatar} alt="" width={32} height={32} />
+            ) : null}
+            <span className="dash-user__name">{displayName}</span>
+          </Link>
         ) : null}
-        {admin ? (
-          <Link className="dash-topbar__link" href="/admin">Admin</Link>
-        ) : null}
-        {user ? <span className="balance-pill">{user.balance} pts</span> : null}
         {profile ? (
-          <a className="btn btn-outline dash-user__signout" href="/api/auth/logout">
+          <a className="btn btn-outline btn-sm dash-user__signout" href="/api/auth/logout">
             Sign out
           </a>
         ) : (
-          <a className="btn btn-primary dash-user__signout" href="/api/auth/start">
+          <a className="btn btn-primary btn-sm dash-user__signout" href="/api/auth/start">
             Sign in
           </a>
         )}

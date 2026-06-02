@@ -6,10 +6,48 @@ import { prisma } from '@/lib/db';
 import { fetchHackatimeProjectSeconds } from '@/lib/hackatime';
 import { getSessionProfile } from '@/lib/session';
 
+// Create a new submission ("fix") and send the author to its project page.
+export async function submitFixAction(formData: FormData) {
+  const profile = await getSessionProfile();
+  if (!profile) {
+    redirect('/api/auth/start');
+  }
+
+  const title = String(formData.get('title') || '').trim();
+  const url = String(formData.get('url') || '').trim();
+  const repo = String(formData.get('repo') || '').trim();
+  const notes = String(formData.get('notes') || '').trim();
+  const category = String(formData.get('category') || 'Other').trim() || 'Other';
+  const hackatimeProject = String(formData.get('hackatimeProject') || '').trim() || null;
+
+  if (!title || !url || !repo) {
+    redirect(`/projects/submit?error=${encodeURIComponent('Title, link, and repo are required.')}`);
+  }
+
+  const created = await prisma.submission.create({
+    data: {
+      hackClubId: profile.id,
+      email: profile.email || '',
+      displayName: profile.display_name || '',
+      title,
+      url,
+      repo,
+      category,
+      notes,
+      hackatimeProject,
+      status: 'Submitted',
+    },
+  });
+
+  revalidatePath('/account');
+  revalidatePath('/projects');
+  redirect(`/projects/${created.id}`);
+}
+
 export async function postDevlogAction(formData: FormData) {
   const profile = await getSessionProfile();
   if (!profile) {
-    redirect('/dashboard');
+    redirect('/api/auth/start');
   }
 
   const submissionId = String(formData.get('submissionId') || '');
@@ -17,7 +55,7 @@ export async function postDevlogAction(formData: FormData) {
 
   const submission = await prisma.submission.findUnique({ where: { id: submissionId } });
   if (!submission || submission.hackClubId !== profile.id) {
-    redirect('/dashboard/submissions');
+    redirect('/account');
   }
 
   if (!text) {
@@ -46,7 +84,7 @@ export async function postDevlogAction(formData: FormData) {
   }
 
   revalidatePath(`/projects/${submissionId}`);
-  revalidatePath('/dashboard/submissions');
+  revalidatePath('/account');
   revalidatePath('/admin/submissions');
   redirect(`/projects/${submissionId}`);
 }

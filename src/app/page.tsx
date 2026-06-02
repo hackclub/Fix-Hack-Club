@@ -1,44 +1,35 @@
-import Nav from '@/components/Nav';
+import SiteHeader from '@/components/SiteHeader';
 import Reveal from '@/components/Reveal';
-import { getListings } from '@/lib/listings';
 
 export const dynamic = 'force-dynamic';
 
 const howSteps = [
-  { id: 'TICKET-01', n: '01', title: 'Find It', body: 'Find broken things to fix, designs to improve, or missing content you think would be helpful!' },
-  { id: 'TICKET-02', n: '02', title: 'Fix It', body: 'Fork the repo. Make your changes, and make a Pull Request!' },
-  { id: 'TICKET-03', n: '03', title: 'Ship It', body: 'Work with Hack Club staff to get your PR reviewed and merged. Shipped = quest complete.' },
-  { id: 'TICKET-04', n: '04', title: 'Claim It', body: 'Receive a grant depending on the time and effort spent making the PR (Impact is a factor as well!)' },
+  { id: 'STEP-01', n: '01', title: 'Find It', body: 'Browse open projects — broken things to fix, designs to improve, or missing content worth adding.' },
+  { id: 'STEP-02', n: '02', title: 'Fix It', body: 'Fork the repo, make your changes, and open a Pull Request.' },
+  { id: 'STEP-03', n: '03', title: 'Ship It', body: 'Work with Hack Club staff to get your PR reviewed and merged. Shipped = quest complete.' },
+  { id: 'STEP-04', n: '04', title: 'Claim It', body: 'Earn points based on the time and impact of your work — then spend them in the shop.' },
 ];
 
-const contributeSteps = [
-  { id: 'STEP-01', n: '01', title: 'Fork the Repo', body: 'Open the repository you want to improve and fork it to your GitHub account.' },
-  { id: 'STEP-02', n: '02', title: 'Make Changes', body: 'Clone your fork locally, and build your fix or improvement.' },
-  { id: 'STEP-03', n: '03', title: 'Open a PR', body: 'Push your branch and open a Pull Request with a clear explanation of your changes.' },
-  { id: 'STEP-04', n: '04', title: 'Get Reviewed', body: 'Work with maintainers to polish the PR until it is merged and shipped. Also always follow the code of conduct.' },
-];
-
-export default async function Home() {
-  const listings = await getListings();
-
+export default function Home() {
   return (
-    <>
+    <div className="dash-body">
       <div className="caution-tape" id="top"></div>
 
-      <Nav />
+      <SiteHeader />
 
       <header className="hero">
+        <span className="hero-kicker">⚒ Hack Club PullQuest</span>
         <h1>
           <span className="yellow">Fix</span>
           <br />
           <span className="outline">Hack Club</span>
         </h1>
         <p className="hero-desc">
-          Submit PRs to improve Hack Club&apos;s infra. Fix CSS, add pages to YSWS programs, or anything else approved by the program managers.
+          Submit PRs to improve Hack Club&apos;s infra. Fix CSS, add pages to YSWS programs, or anything else approved by the program managers — and earn points for your time.
         </p>
         <div className="btn-row">
-          <a href="/dashboard" className="btn btn-primary">
-            ⚒ Open your dashboard
+          <a href="/projects" className="btn btn-primary">
+            ⚒ Browse projects
           </a>
           <a
             href="https://hackclub.enterprise.slack.com/archives/C0ALHGAASLV"
@@ -52,7 +43,7 @@ export default async function Home() {
             Browse Repos
           </a>
         </div>
-        <p className="hero-note">Sign in on the dashboard to submit fixes and track your contributions.</p>
+        <p className="hero-note">Sign in with Hack Club to submit fixes and track your contributions.</p>
       </header>
 
       <div className="tape-divider"></div>
@@ -60,7 +51,7 @@ export default async function Home() {
       <main>
         <div className="section" id="how">
           <div className="section-inner">
-            <div className="section-label">How this Works?</div>
+            <div className="section-label">How it works</div>
             <div className="tickets">
               {howSteps.map((step) => (
                 <div className="ticket" key={step.id}>
@@ -74,68 +65,21 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="tape-divider"></div>
-
-        <div className="section" id="jobs">
-          <div className="section-inner">
-            <div className="section-label">Job Listings</div>
-            <div id="job-listings-container">
-              {listings.map((listing) => (
-                <div className={`ticketA${listing.status === 'finished' ? ' finished' : ''}`} key={listing.id}>
-                  <div className="ticket-idA">{listing.id}</div>
-                  <h3>
-                    <a href={listing.url} target="_blank" rel="noopener noreferrer">
-                      {listing.title}
-                    </a>
-                  </h3>
-                  <p>{listing.description}</p>
-                  <br />
-                  <ul>
-                    {listing.requirements.map((req, index) => (
-                      <li key={index}>{req}</li>
-                    ))}
-                  </ul>
-                  <div className="btn-row">
-                    <a href={listing.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-                      Page Link
-                    </a>
-                    <a href={listing.github_url} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                      Github Repository
-                    </a>
-                  </div>
-                </div>
-              ))}
+        <div className="section">
+          <div className="cta-band">
+            <div className="cta-band__copy">
+              <h2>Ready to ship something?</h2>
+              <p>Pick an open project, open a PR, and log your work. New here? Read the contribution guide first.</p>
             </div>
-          </div>
-        </div>
-
-        <div className="tape-divider"></div>
-
-        <div className="section" id="contribute">
-          <div className="section-inner">
-            <div className="section-label">Github Contribution Guide</div>
-            <div className="tickets">
-              {contributeSteps.map((step) => (
-                <div className="ticket" key={step.id}>
-                  <div className="ticket-id">{step.id}</div>
-                  <h3>{step.title}</h3>
-                  <p>{step.body}</p>
-                  <div className="ticket-num">{step.n}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="btn-row" style={{ marginTop: '2rem' }}>
+            <div className="btn-row">
+              <a href="/projects" className="btn btn-primary">See open projects</a>
               <a
                 href="https://github.com/hackclub/.github/blob/main/CONTRIBUTING.md"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-primary"
+                className="btn btn-outline"
               >
                 Read CONTRIBUTING.md
-              </a>
-              <a href="/dashboard" className="btn btn-outline">
-                Open Dashboard
               </a>
             </div>
           </div>
@@ -168,6 +112,6 @@ export default async function Home() {
       </footer>
 
       <Reveal />
-    </>
+    </div>
   );
 }
