@@ -75,6 +75,7 @@ export async function fetchHackatimeProjects(uid: string): Promise<HackatimeProj
   if (!uid) return [];
   const url = new URL(`${API}/users/${encodeURIComponent(uid)}/stats`);
   url.searchParams.set('features', 'projects');
+  url.searchParams.set('start_date', config.hackatimeStartDate);
   const response = await fetch(url, { headers: statsHeaders() });
   if (!response.ok) return [];
 
@@ -90,6 +91,7 @@ export async function fetchHackatimeProjectSeconds(uid: string, projectName: str
   if (!uid || !projectName) return 0;
   const url = new URL(`${API}/users/${encodeURIComponent(uid)}/stats`);
   url.searchParams.set('features', 'projects');
+  url.searchParams.set('start_date', config.hackatimeStartDate);
   url.searchParams.set('total_seconds', 'true');
   url.searchParams.set('filter_by_project', projectName);
   const response = await fetch(url, { headers: statsHeaders() });

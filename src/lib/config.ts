@@ -13,4 +13,7 @@ export const config = {
   hackatimeClientSecret: process.env.HACKATIME_CLIENT_SECRET || '',
   hackatimeStateCookieName: process.env.HACKATIME_STATE_COOKIE_NAME || 'fixhc_hackatime_state',
   hackatimeBypassKeys: process.env.HACKATIME_BYPASS_KEYS || '',
+  // Fixed epoch so stats are a stable running total (not a rolling window),
+  // which keeps devlog deltas / accumulated time correct.
+  hackatimeStartDate: process.env.HACKATIME_START_DATE || '2025-01-01',
 } as const;
