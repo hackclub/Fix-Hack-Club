@@ -19,9 +19,13 @@ A YSWS program associated with PullQuests (for Clubs). Participants submit PRs t
 
 ## Economy
 
-Members earn points when an admin approves their submission and sets a point value. Approving credits the author's balance and lifetime total and writes a ledger entry; rejecting an already-approved fix claws the points back. Points are spent in the shop, which creates an order (admins fulfill or refund). There is no voting.
+Members link a Hackatime project to a submission. When an admin approves it, points are paid at 1 per hour of that project's tracked time (fetched live from Hackatime). Submissions with no linked project fall back to a manual point value. Approving credits the author's balance and lifetime total and writes a ledger entry; rejecting an already-approved fix claws the points back. Points are spent in the shop, which creates an order (admins fulfill or refund). There is no voting.
 
 Admin mutations use Next.js Server Actions (in `src/app/admin/actions.ts` and `src/app/shop/actions.ts`), each guarded by the admin allowlist.
+
+## Hackatime time tracking
+
+Members connect Hackatime via OAuth (Settings). The callback resolves their Hackatime user id from `GET /api/v1/authenticated/me` and stores it; the token is used once and not persisted. Per-project tracked time is read from the public `GET /api/v1/users/{uid}/stats` endpoint. Register a confidential Hackatime OAuth app with redirect URI `{APP_BASE_URL}/api/hackatime/callback` and set `HACKATIME_CLIENT_ID` / `HACKATIME_CLIENT_SECRET`.
 
 ## API routes
 
@@ -30,6 +34,7 @@ App Router route handlers under `src/app/api`:
 - `GET /api/listings`
 - `GET, POST /api/submissions`
 - `GET /api/auth/start`, `/api/auth/callback`, `/api/auth/me`, `/api/auth/logout`
+- `GET /api/hackatime/start`, `/api/hackatime/callback`, `/api/hackatime/disconnect`
 
 ## Local Development
 
@@ -49,6 +54,8 @@ npm run dev
 - `HACKCLUB_AUTH_HOST`: Optional, defaults to `https://auth.hackclub.com`.
 - `SESSION_SECRET`: Secret used to sign the session cookie.
 - `ADMIN_HACK_CLUB_IDS`: Comma or space separated Hack Club identity ids that get the ADMIN role and access to `/admin`.
+- `HACKATIME_CLIENT_ID`, `HACKATIME_CLIENT_SECRET`: Hackatime OAuth app credentials (confidential app).
+- `HACKATIME_BYPASS_KEYS`: Optional rate-limit bypass header for the Hackatime public stats endpoint.
 - `APP_BASE_URL`: Optional but recommended in production. The public origin with no trailing slash (e.g. `https://your-app.onrender.com`). Used to build the OAuth `redirect_uri`. Without it the app derives the origin from `x-forwarded-proto` / `x-forwarded-host`.
 
 The OAuth `redirect_uri` is `<origin>/api/auth/callback`. It must be registered EXACTLY in your Hack Club OAuth app (same scheme and host, no trailing slash). Behind a TLS proxy the scheme must be `https`, so set `APP_BASE_URL` if the auto-detected origin is ever wrong.

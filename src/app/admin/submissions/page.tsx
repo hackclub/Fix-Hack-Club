@@ -45,6 +45,11 @@ export default async function AdminSubmissions() {
                     {s.repo ? ` · ${s.repo}` : ''} · by {s.displayName || s.email || 'Member'}
                   </p>
                   {s.notes ? <p className="admin-row__notes">{s.notes}</p> : null}
+                  {s.hackatimeProject ? (
+                    <p className="admin-row__meta">
+                      Hackatime: <strong>{s.hackatimeProject}</strong> · points auto-computed from tracked hours
+                    </p>
+                  ) : null}
                   {s.url ? (
                     <a href={s.url} target="_blank" rel="noopener noreferrer">
                       Open link
@@ -54,15 +59,19 @@ export default async function AdminSubmissions() {
                 <div className="admin-row__actions">
                   <form action={approveSubmissionAction} className="inline-form">
                     <input type="hidden" name="id" value={s.id} />
-                    <input
-                      className="points-input"
-                      type="number"
-                      name="points"
-                      min={0}
-                      defaultValue={10}
-                      aria-label="Points to award"
-                    />
-                    <button type="submit" className="btn btn-primary btn-sm">Approve</button>
+                    {s.hackatimeProject ? null : (
+                      <input
+                        className="points-input"
+                        type="number"
+                        name="points"
+                        min={0}
+                        defaultValue={10}
+                        aria-label="Points to award"
+                      />
+                    )}
+                    <button type="submit" className="btn btn-primary btn-sm">
+                      {s.hackatimeProject ? 'Approve (pay hours)' : 'Approve'}
+                    </button>
                   </form>
                   <form action={rejectSubmissionAction}>
                     <input type="hidden" name="id" value={s.id} />

@@ -18,5 +18,11 @@ services:
         sync: false
       - key: ADMIN_HACK_CLUB_IDS
         sync: false
+      - key: HACKATIME_CLIENT_ID
+        sync: false
+      - key: HACKATIME_CLIENT_SECRET
+        sync: false
+      - key: HACKATIME_BYPASS_KEYS
+        sync: false
       - key: SESSION_SECRET
         generateValue: true

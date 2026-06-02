@@ -13,6 +13,7 @@ import {
   rejectSubmission,
 } from '@/lib/economy';
 import { readSessionValue } from '@/lib/hackclub';
+import { fetchHackatimeProjectSeconds, secondsToPoints } from '@/lib/hackatime';
 import type { HackClubProfile } from '@/lib/types';
 
 async function requireAdmin(): Promise<HackClubProfile> {
@@ -34,9 +35,25 @@ function int(formData: FormData, name: string, fallback = 0): number {
 }
 
 // ---- Submissions ----
+// Points = 1 per hour of the linked Hackatime project (fetched live by the
+// author's Hackatime user id). Submissions without a linked project fall back
+// to the manually entered points.
 export async function approveSubmissionAction(formData: FormData) {
   const admin = await requireAdmin();
-  await approveSubmission(str(formData, 'id'), int(formData, 'points', 0), admin.id);
+  const id = str(formData, 'id');
+
+  const submission = await prisma.submission.findUnique({ where: { id } });
+  let points = int(formData, 'points', 0);
+
+  if (submission?.hackatimeProject) {
+    const author = await prisma.user.findUnique({ where: { hackClubId: submission.hackClubId } });
+    if (author?.hackatimeUserId) {
+      const seconds = await fetchHackatimeProjectSeconds(author.hackatimeUserId, submission.hackatimeProject);
+      points = secondsToPoints(seconds);
+    }
+  }
+
+  await approveSubmission(id, points, admin.id);
   revalidatePath('/admin/submissions');
   revalidatePath('/explore');
 }

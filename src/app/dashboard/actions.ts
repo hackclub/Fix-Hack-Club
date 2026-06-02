@@ -16,6 +16,7 @@ export async function submitFixAction(formData: FormData) {
   const repo = String(formData.get('repo') || '').trim();
   const notes = String(formData.get('notes') || '').trim();
   const category = String(formData.get('category') || 'Other').trim() || 'Other';
+  const hackatimeProject = String(formData.get('hackatimeProject') || '').trim() || null;
 
   if (!title || !url || !repo) {
     redirect(`/dashboard/submit?error=${encodeURIComponent('Title, link, and repo are required.')}`);
@@ -31,6 +32,7 @@ export async function submitFixAction(formData: FormData) {
       repo,
       category,
       notes,
+      hackatimeProject,
       status: 'Submitted',
     },
   });

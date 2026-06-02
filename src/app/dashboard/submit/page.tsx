@@ -1,4 +1,5 @@
-import { getSessionProfile } from '@/lib/session';
+import { getDbUser, getSessionProfile } from '@/lib/session';
+import { fetchHackatimeProjects, secondsToHours } from '@/lib/hackatime';
 import { submitFixAction } from '../actions';
 
 export const runtime = 'nodejs';
@@ -15,6 +16,9 @@ export default async function SubmitPage({
   }
 
   const sp = await searchParams;
+  const user = await getDbUser();
+  const connected = Boolean(user?.hackatimeUserId);
+  const projects = connected ? await fetchHackatimeProjects(user!.hackatimeUserId as string) : [];
 
   return (
     <>
@@ -22,11 +26,16 @@ export default async function SubmitPage({
         <div className="dash-pagehead__copy">
           <p className="auth-card__eyebrow">Submit work</p>
           <h1 className="dashboard-title">Submit a fix</h1>
-          <p className="dashboard-copy">Log a pull request you opened. An admin reviews it and awards points.</p>
+          <p className="dashboard-copy">Log a pull request and link the Hackatime project you worked in. On approval you earn 1 point per hour tracked.</p>
         </div>
       </div>
 
       {sp.error ? <p className="flash flash--error">{sp.error}</p> : null}
+      {!connected ? (
+        <p className="flash">
+          <a href="/api/hackatime/start">Connect Hackatime</a> to link a project and earn points for your coding time.
+        </p>
+      ) : null}
 
       <section className="dashboard-panel">
         <form action={submitFixAction} className="dashboard-form is-active">
@@ -43,6 +52,18 @@ export default async function SubmitPage({
           <label className="field">
             <span>Repo / Project</span>
             <input name="repo" type="text" placeholder="hackclub/slack.hackclub.com" required />
+          </label>
+
+          <label className="field">
+            <span>Hackatime project</span>
+            <select name="hackatimeProject" defaultValue="">
+              <option value="">{connected ? 'Not linked (no points)' : 'Connect Hackatime to link'}</option>
+              {projects.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name} ({secondsToHours(p.seconds)}h)
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="field">

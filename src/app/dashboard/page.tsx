@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
+import { secondsToHours } from '@/lib/hackatime';
 import { getDbUser, getSessionProfile } from '@/lib/session';
 
 export const runtime = 'nodejs';
@@ -20,12 +21,16 @@ export default async function DashboardOverview() {
 
   const firstName = (profile.display_name || profile.first_name || 'there').split(' ')[0];
 
-  const stats = [
+  const stats: { label: string; value: number | string }[] = [
     { label: 'Points', value: user?.balance ?? 0 },
     { label: 'Earned all-time', value: user?.totalEarned ?? 0 },
     { label: 'Approved fixes', value: approved },
     { label: 'Awaiting review', value: pending },
   ];
+
+  if (user?.hackatimeUserId) {
+    stats.push({ label: 'Coding time', value: `${secondsToHours(user.hackatimeSeconds)}h` });
+  }
 
   return (
     <>
