@@ -3,7 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
 import { secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { getSessionProfile } from '@/lib/session';
-import { postDevlogAction } from '../actions';
+import { postDevlogAction, submitForReviewAction } from '../actions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -65,9 +65,50 @@ export default async function ProjectPage({
           </div>
         </div>
 
+        {isOwner ? (
+          <section className="dashboard-panel dashboard-panel--summary">
+            <p className="auth-card__eyebrow">Status</p>
+            {submission.status === 'Draft' ? (
+              <>
+                <h3>Draft</h3>
+                <p className="dashboard-copy">
+                  This fix is a private draft. Keep posting devlogs as you work — when it&apos;s ready, submit it so an admin can review and award points.
+                </p>
+                <form action={submitForReviewAction}>
+                  <input type="hidden" name="submissionId" value={submission.id} />
+                  <button type="submit" className="btn btn-primary">⏩ Submit for review</button>
+                </form>
+              </>
+            ) : submission.status === 'Submitted' ? (
+              <>
+                <h3>In review</h3>
+                <p className="dashboard-copy">
+                  Submitted for review — an admin will approve or reject it soon. You can still post devlogs while you wait.
+                </p>
+              </>
+            ) : submission.status === 'Rejected' ? (
+              <>
+                <h3>Not approved</h3>
+                <p className="dashboard-copy">
+                  This wasn&apos;t approved. Make your changes, then submit it for review again.
+                </p>
+                <form action={submitForReviewAction}>
+                  <input type="hidden" name="submissionId" value={submission.id} />
+                  <button type="submit" className="btn btn-primary">⏩ Submit for review again</button>
+                </form>
+              </>
+            ) : (
+              <>
+                <h3>Approved</h3>
+                <p className="dashboard-copy">Shipped and approved — points have been awarded. Nice work!</p>
+              </>
+            )}
+          </section>
+        ) : null}
+
         {submission.hackatimeProject ? (
           <p className="flash">
-            Linked Hackatime project: <strong>{submission.hackatimeProject}</strong>. Posting devlogs logs your time and earns pending points (1 per hour). An admin pays them out when this project is shipped and approved.
+            Linked Hackatime project: <strong>{submission.hackatimeProject}</strong>. Posting devlogs logs your time and earns pending points (1 per hour). An admin pays them out when this project is approved.
           </p>
         ) : (
           <p className="flash flash--error">No Hackatime project is linked, so coding time cannot be counted for this project.</p>
@@ -85,7 +126,7 @@ export default async function ProjectPage({
           </section>
         ) : null}
 
-        {isOwner ? (
+        {isOwner && submission.status !== 'Approved' ? (
           <section className="dashboard-panel">
             <div className="dashboard-form__header">
               <p className="auth-card__eyebrow">Devlog</p>

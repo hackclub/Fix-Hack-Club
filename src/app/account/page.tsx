@@ -41,6 +41,7 @@ export default async function AccountPage() {
 
   const approved = submissions.filter((s) => s.status === 'Approved').length;
   const pending = submissions.filter((s) => s.status === 'Submitted').length;
+  const drafts = submissions.filter((s) => s.status === 'Draft').length;
   const pendingPoints = submissions
     .filter((s) => s.status === 'Submitted')
     .reduce((sum, s) => sum + secondsToPoints(s.loggedSeconds), 0);
@@ -53,6 +54,7 @@ export default async function AccountPage() {
     { label: 'Earned all-time', value: user?.totalEarned ?? 0 },
     { label: 'Approved fixes', value: approved },
     { label: 'Awaiting review', value: pending },
+    { label: 'Drafts', value: drafts },
   ];
   if (user?.hackatimeUserId) {
     stats.push({ label: 'Coding time', value: `${secondsToHours(user.hackatimeSeconds)}h` });
@@ -122,7 +124,9 @@ export default async function AccountPage() {
                   </p>
                   {s.notes ? <p>{s.notes}</p> : null}
                   <p>
-                    <Link href={`/projects/${s.id}`}>View project / post devlog</Link>
+                    <Link href={`/projects/${s.id}`}>
+                      {s.status === 'Draft' ? 'Open draft → submit for review' : 'View project / post devlog'}
+                    </Link>
                   </p>
                 </article>
               ))

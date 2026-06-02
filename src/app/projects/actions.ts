@@ -6,7 +6,9 @@ import { prisma } from '@/lib/db';
 import { fetchHackatimeProjectSeconds } from '@/lib/hackatime';
 import { getSessionProfile } from '@/lib/session';
 
-// Create a new submission ("fix") and send the author to its project page.
+// Create a new fix as a DRAFT and send the author to its project page.
+// Drafts are private working space — they only enter the admin review queue
+// once the author presses "Submit for review" (submitForReviewAction below).
 export async function submitFixAction(formData: FormData) {
   const profile = await getSessionProfile();
   if (!profile) {
@@ -35,13 +37,42 @@ export async function submitFixAction(formData: FormData) {
       category,
       notes,
       hackatimeProject,
-      status: 'Submitted',
+      status: 'Draft',
     },
   });
 
   revalidatePath('/account');
   revalidatePath('/projects');
   redirect(`/projects/${created.id}`);
+}
+
+// Move a draft (or a previously rejected fix) into the admin review queue.
+// Only the author may do this, and only from Draft/Rejected — never from an
+// already-submitted or approved state.
+export async function submitForReviewAction(formData: FormData) {
+  const profile = await getSessionProfile();
+  if (!profile) {
+    redirect('/api/auth/start');
+  }
+
+  const submissionId = String(formData.get('submissionId') || '');
+  const submission = await prisma.submission.findUnique({ where: { id: submissionId } });
+
+  if (!submission || submission.hackClubId !== profile.id) {
+    redirect('/account');
+  }
+
+  if (submission.status === 'Draft' || submission.status === 'Rejected') {
+    await prisma.submission.update({
+      where: { id: submissionId },
+      data: { status: 'Submitted' },
+    });
+  }
+
+  revalidatePath(`/projects/${submissionId}`);
+  revalidatePath('/account');
+  revalidatePath('/admin/submissions');
+  redirect(`/projects/${submissionId}`);
 }
 
 export async function postDevlogAction(formData: FormData) {
