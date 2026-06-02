@@ -38,6 +38,15 @@ export default async function AccountPage() {
     where: { hackClubId: profile.id },
     orderBy: { createdAt: 'desc' },
   });
+  // The points ledger: every + (approvals, refunds, admin grants) and
+  // - (shop spends, clawbacks) movement on this account.
+  const ledger = user
+    ? await prisma.ledgerEntry.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 30,
+      })
+    : [];
 
   const approved = submissions.filter((s) => s.status === 'Approved').length;
   const pending = submissions.filter((s) => s.status === 'Submitted').length;
@@ -95,6 +104,30 @@ export default async function AccountPage() {
             </div>
           ))}
         </div>
+
+        <section className="dashboard-panel dashboard-panel--list" style={{ marginTop: 22 }}>
+          <div className="dashboard-form__header">
+            <p className="auth-card__eyebrow">Points</p>
+            <h3>Points activity</h3>
+          </div>
+          {ledger.length === 0 ? (
+            <p className="dashboard-list__empty">No points activity yet. Approved fixes and shop redemptions will show up here.</p>
+          ) : (
+            <div className="ledger">
+              {ledger.map((entry) => (
+                <div className="ledger__row" key={entry.id}>
+                  <div className="ledger__main">
+                    <span className="ledger__reason">{entry.reason || 'Adjustment'}</span>
+                    <span className="ledger__date">{new Date(entry.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <span className={`ledger__delta ${entry.delta >= 0 ? 'is-pos' : 'is-neg'}`}>
+                    {entry.delta >= 0 ? `+${entry.delta}` : entry.delta}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         <section className="dashboard-panel dashboard-panel--list" style={{ marginTop: 22 }}>
           <div className="dashboard-form__header">
