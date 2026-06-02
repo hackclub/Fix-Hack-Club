@@ -69,6 +69,12 @@ model Submission {
   hackClubId   String    @map("hack_club_id")
   email        String?
   displayName  String?   @map("display_name")
+  firstName      String? @map("first_name")
+  lastName       String? @map("last_name")
+  githubUsername String? @map("github_username")
+  dateOfBirth    String? @map("date_of_birth")
+  slackId        String? @map("slack_id")
+  submissionType String? @map("submission_type")
   title        String
   url          String    @default("")
   repo         String    @default("")
@@ -142,6 +148,14 @@ model ShopOrder {
   cost            Int      @default(0)
   status          String   @default("pending")
   fulfillmentNote String?  @map("fulfillment_note")
+  grantType       String?  @map("grant_type")
+  fulfilment      String?
+  addressLine1    String?  @map("address_line1")
+  addressLine2    String?  @map("address_line2")
+  city            String?
+  state           String?
+  zip             String?
+  country         String?
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 

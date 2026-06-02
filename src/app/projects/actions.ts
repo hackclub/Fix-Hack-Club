@@ -15,27 +15,45 @@ export async function submitFixAction(formData: FormData) {
     redirect('/api/auth/start');
   }
 
-  const title = String(formData.get('title') || '').trim();
-  const url = String(formData.get('url') || '').trim();
-  const repo = String(formData.get('repo') || '').trim();
-  const notes = String(formData.get('notes') || '').trim();
-  const category = String(formData.get('category') || 'Other').trim() || 'Other';
-  const hackatimeProject = String(formData.get('hackatimeProject') || '').trim() || null;
+  const get = (name: string) => String(formData.get(name) || '').trim();
+
+  const title = get('title');
+  const url = get('url');
+  const repo = get('repo');
+  const category = get('category') || 'Other';
+  const hackatimeProject = get('hackatimeProject') || null;
+
+  // Personal info (from the wizard's Info step).
+  const firstName = get('firstName');
+  const lastName = get('lastName');
+  const email = get('email') || profile.email || '';
+  const githubUsername = get('githubUsername');
+  const dateOfBirth = get('dateOfBirth') || null;
+  const slackId = get('slackId') || profile.slack_id || null;
+  const submissionType = get('submissionType') || 'Individual Submission';
 
   if (!title || !url || !repo) {
     redirect(`/projects/submit?error=${encodeURIComponent('Title, link, and repo are required.')}`);
   }
 
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || profile.display_name || '';
+
   const created = await prisma.submission.create({
     data: {
       hackClubId: profile.id,
-      email: profile.email || '',
-      displayName: profile.display_name || '',
+      email,
+      displayName,
+      firstName: firstName || null,
+      lastName: lastName || null,
+      githubUsername: githubUsername || null,
+      dateOfBirth,
+      slackId,
+      submissionType,
       title,
       url,
       repo,
       category,
-      notes,
+      notes: '',
       hackatimeProject,
       status: 'Draft',
     },

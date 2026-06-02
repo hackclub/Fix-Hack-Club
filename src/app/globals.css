@@ -282,6 +282,20 @@ footer a:hover { color: hsl(var(--primary)); }
 .points-input { width: 92px; }
 .note-input { width: 220px; }
 
+/* ---------- Multi-step wizard ---------- */
+.wizard { display: grid; gap: 22px; }
+.wizard__steps { display: flex; gap: 8px; list-style: none; flex-wrap: wrap; }
+.wizard__step { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: hsl(var(--muted-foreground)); padding: 8px 14px; border: 2px solid hsl(var(--border)); border-radius: 999px; }
+.wizard__step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: hsl(var(--secondary)); color: hsl(var(--muted-foreground)); font-family: var(--font-mono); font-size: 12px; }
+.wizard__step.is-active { color: hsl(var(--foreground)); border-color: hsl(var(--primary)); }
+.wizard__step.is-active .wizard__step-num { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.wizard__step.is-done { color: hsl(var(--foreground)); border-color: hsl(var(--primary) / 0.4); }
+.wizard__step.is-done .wizard__step-num { background: hsl(var(--success) / 0.22); color: hsl(var(--success)); }
+.wizard__panel { display: grid; gap: 15px; }
+.wizard__nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+
 /* ---------- Lists ---------- */
 .dashboard-list { display: grid; gap: 12px; }
 .dashboard-list__empty { color: hsl(var(--muted-foreground)); }

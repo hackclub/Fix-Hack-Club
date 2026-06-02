@@ -1,8 +1,8 @@
+import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
 import { formatPoints } from '@/lib/hackatime';
 import { getDbUser } from '@/lib/session';
-import { redeemAction } from './actions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -82,16 +82,15 @@ export default async function ShopPage({
                         <span className="shop-card__stock">{item.stock} left</span>
                       ) : null}
                     </div>
-                    <form action={redeemAction}>
-                      <input type="hidden" name="itemId" value={item.id} />
-                      <button
-                        type="submit"
-                        className="btn btn-primary shop-card__btn"
-                        disabled={!user || soldOut || !canAfford}
-                      >
-                        {soldOut ? 'Sold out' : !user ? 'Sign in to redeem' : !canAfford ? 'Not enough points' : 'Redeem'}
+                    {!user || soldOut || !canAfford ? (
+                      <button type="button" className="btn btn-primary shop-card__btn" disabled>
+                        {soldOut ? 'Sold out' : !user ? 'Sign in to redeem' : 'Not enough points'}
                       </button>
-                    </form>
+                    ) : (
+                      <Link href={`/shop/redeem/${item.id}`} className="btn btn-primary shop-card__btn">
+                        Redeem
+                      </Link>
+                    )}
                   </div>
                 </article>
               );

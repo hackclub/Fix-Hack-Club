@@ -100,6 +100,17 @@ export async function adjustBalance(userId: string, delta: number, reason: strin
   });
 }
 
+export interface RedemptionDetails {
+  grantType?: string;
+  fulfilment?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+}
+
 // Member redeems a shop item: validate stock + balance, spend points, create order.
 //
 // The balance and stock deductions use conditional UPDATE statements (via
@@ -107,7 +118,7 @@ export async function adjustBalance(userId: string, delta: number, reason: strin
 // race past the checks.  Each translates to a single atomic SQL UPDATE … WHERE
 // that PostgreSQL executes with row-level locking — eliminating the double-spend
 // and oversell race conditions that a read-then-write pattern would allow.
-export async function redeemItem(userId: string, itemId: string) {
+export async function redeemItem(userId: string, itemId: string, details: RedemptionDetails = {}) {
   await prisma.$transaction(async (tx) => {
     // Read the item first for early, user-friendly error messages and to get the
     // cost/name values needed for the ledger entry and order record.
@@ -149,7 +160,21 @@ export async function redeemItem(userId: string, itemId: string) {
     }
 
     await tx.shopOrder.create({
-      data: { userId, shopItemId: item.id, itemName: item.name, cost: item.cost, status: 'pending' },
+      data: {
+        userId,
+        shopItemId: item.id,
+        itemName: item.name,
+        cost: item.cost,
+        status: 'pending',
+        grantType: details.grantType || null,
+        fulfilment: details.fulfilment || null,
+        addressLine1: details.addressLine1 || null,
+        addressLine2: details.addressLine2 || null,
+        city: details.city || null,
+        state: details.state || null,
+        zip: details.zip || null,
+        country: details.country || null,
+      },
     });
   });
 }
