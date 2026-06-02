@@ -73,6 +73,23 @@ export default async function FindWorkPage() {
             ))}
           </div>
         )}
+
+        <div className="cta-band" style={{ marginTop: 28 }}>
+          <div className="cta-band__copy">
+            <h2>Want your repo added?</h2>
+            <p>Maintain a Hack Club repo that could use some fixes? Get it listed here in Find work — DM Elias on Slack.</p>
+          </div>
+          <div className="btn-row">
+            <a
+              href="https://hackclub.com/slack"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary"
+            >
+              DM Elias on Slack
+            </a>
+          </div>
+        </div>
       </main>
 
       <div className="caution-tape"></div>
