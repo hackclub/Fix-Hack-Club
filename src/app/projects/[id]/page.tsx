@@ -90,6 +90,7 @@ export default async function ProjectPage({
             <div className="dashboard-form__header">
               <p className="auth-card__eyebrow">Devlog</p>
               <h3>Post an update</h3>
+              <p className="dashboard-copy">Post a new devlog whenever you work on this. Each one logs the time since your last update.</p>
             </div>
             {sp.error ? <p className="flash flash--error">{sp.error}</p> : null}
             <form action={postDevlogAction} className="dashboard-form is-active">
@@ -116,7 +117,7 @@ export default async function ProjectPage({
                 <article className="dashboard-list__item" key={d.id}>
                   <div className="dashboard-list__item-head">
                     <h4>{new Date(d.createdAt).toLocaleDateString()}</h4>
-                    <span className="balance-pill">{secondsToHours(d.seconds)}h logged</span>
+                    <span className="balance-pill">+{secondsToHours(d.seconds)}h</span>
                   </div>
                   <p>{d.text}</p>
                 </article>

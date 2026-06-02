@@ -24,22 +24,25 @@ export async function postDevlogAction(formData: FormData) {
     redirect(`/projects/${submissionId}?error=${encodeURIComponent('Write something in your devlog.')}`);
   }
 
-  // Snapshot the linked Hackatime project's current tracked time. Only this
-  // logged time counts toward points on approval.
-  let seconds = 0;
+  // Read the linked Hackatime project's current cumulative time, then record the
+  // delta logged in THIS devlog (time since the last one). The submission's
+  // loggedSeconds tracks the cumulative total; pending points derive from it.
+  let cumulativeSeconds = 0;
   if (submission.hackatimeProject) {
     const author = await prisma.user.findUnique({ where: { hackClubId: submission.hackClubId } });
     if (author?.hackatimeUserId) {
-      seconds = await fetchHackatimeProjectSeconds(author.hackatimeUserId, submission.hackatimeProject);
+      cumulativeSeconds = await fetchHackatimeProjectSeconds(author.hackatimeUserId, submission.hackatimeProject);
     }
   }
 
+  const delta = Math.max(0, cumulativeSeconds - submission.loggedSeconds);
+
   await prisma.devlog.create({
-    data: { submissionId, hackClubId: profile.id, text, seconds },
+    data: { submissionId, hackClubId: profile.id, text, seconds: delta },
   });
 
-  if (seconds > submission.loggedSeconds) {
-    await prisma.submission.update({ where: { id: submissionId }, data: { loggedSeconds: seconds } });
+  if (cumulativeSeconds > submission.loggedSeconds) {
+    await prisma.submission.update({ where: { id: submissionId }, data: { loggedSeconds: cumulativeSeconds } });
   }
 
   revalidatePath(`/projects/${submissionId}`);
