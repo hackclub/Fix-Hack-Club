@@ -1,8 +1,18 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import SideNav from '@/components/SideNav';
 import { isAdminId } from '@/lib/admin';
 import { getSessionProfile } from '@/lib/session';
+
+const ADMIN_NAV = [
+  { href: '/admin', label: 'Overview' },
+  { href: '/admin/submissions', label: 'Submissions' },
+  { href: '/admin/listings', label: 'Listings' },
+  { href: '/admin/shop', label: 'Shop items' },
+  { href: '/admin/orders', label: 'Orders' },
+  { href: '/admin/users', label: 'Users' },
+];
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -35,14 +45,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <main className="dash-shell">
         <div className="dash-layout">
           <aside className="dash-sidebar">
-            <nav className="dash-nav" aria-label="Admin sections">
-              <Link className="dash-nav__link" href="/admin">Overview</Link>
-              <Link className="dash-nav__link" href="/admin/submissions">Submissions</Link>
-              <Link className="dash-nav__link" href="/admin/listings">Listings</Link>
-              <Link className="dash-nav__link" href="/admin/shop">Shop items</Link>
-              <Link className="dash-nav__link" href="/admin/orders">Orders</Link>
-              <Link className="dash-nav__link" href="/admin/users">Users</Link>
-            </nav>
+            <SideNav items={ADMIN_NAV} ariaLabel="Admin sections" roots={['/admin']} />
           </aside>
 
           <div className="dash-main">{children}</div>

@@ -1,88 +1,65 @@
 import Link from 'next/link';
-import { isAdminId } from '@/lib/admin';
+import { prisma } from '@/lib/db';
 import { getDbUser, getSessionProfile } from '@/lib/session';
-import DashboardWorkspace from '@/components/DashboardWorkspace';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
-  title: 'FixHC - Dashboard',
-};
-
-export default async function DashboardPage() {
+export default async function DashboardOverview() {
   const profile = await getSessionProfile();
-
   if (!profile) {
-    return (
-      <div className="dash-body">
-        <div className="caution-tape"></div>
-
-        <header className="dash-topbar">
-          <a className="nav-brand" href="/">⚙ FixHC</a>
-          <div className="dash-topbar__right">
-            <a className="dash-topbar__link" href="/explore">Explore</a>
-            <a className="dash-topbar__link" href="/shop">Shop</a>
-            <a className="dash-topbar__link" href="/">Back to site</a>
-          </div>
-        </header>
-
-        <main className="dash-shell">
-          <section className="dash-gate">
-            <div className="dash-gate__card">
-              <p className="auth-card__eyebrow">FixHC Workspace</p>
-              <h1 className="dash-gate__title">Sign in to your dashboard</h1>
-              <p className="dash-gate__copy">
-                Link your Hack Club account to submit fixes, track your contributions, and keep everything in one place.
-              </p>
-              <a className="btn btn-primary dash-gate__button" href="/api/auth/start">
-                Sign in with Hack Club
-              </a>
-              <a className="dash-gate__back" href="/">
-                Return to the landing page
-              </a>
-            </div>
-          </section>
-        </main>
-
-        <div className="caution-tape"></div>
-      </div>
-    );
+    return null;
   }
 
-  const dbUser = await getDbUser();
-  const admin = isAdminId(profile.id);
-  const displayName = profile.display_name || profile.first_name || profile.email || 'Member';
+  const user = await getDbUser();
+  const [total, approved, pending] = await Promise.all([
+    prisma.submission.count({ where: { hackClubId: profile.id } }),
+    prisma.submission.count({ where: { hackClubId: profile.id, status: 'Approved' } }),
+    prisma.submission.count({ where: { hackClubId: profile.id, status: 'Submitted' } }),
+  ]);
+
+  const firstName = (profile.display_name || profile.first_name || 'there').split(' ')[0];
+
+  const stats = [
+    { label: 'Points', value: user?.balance ?? 0 },
+    { label: 'Earned all-time', value: user?.totalEarned ?? 0 },
+    { label: 'Approved fixes', value: approved },
+    { label: 'Awaiting review', value: pending },
+  ];
 
   return (
-    <div className="dash-body">
-      <div className="caution-tape"></div>
-
-      <header className="dash-topbar">
-        <a className="nav-brand" href="/">⚙ FixHC</a>
-        <div className="dash-topbar__right">
-          <Link className="dash-topbar__link" href="/explore">Explore</Link>
-          <Link className="dash-topbar__link" href="/shop">Shop</Link>
-          <Link className="dash-topbar__link" href="/settings">Settings</Link>
-          {admin ? <Link className="dash-topbar__link" href="/admin">Admin</Link> : null}
-          <div className="dash-user">
-            {profile.avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img className="dash-user__avatar" src={profile.avatar} alt="" width={32} height={32} />
-            ) : null}
-            <span className="dash-user__name">{displayName}</span>
-            <a className="btn btn-outline dash-user__signout" href="/api/auth/logout">
-              Sign out
-            </a>
-          </div>
+    <>
+      <div className="dash-pagehead">
+        <div className="dash-pagehead__copy">
+          <p className="auth-card__eyebrow">Your workspace</p>
+          <h1 className="dashboard-title">Welcome back, {firstName}</h1>
+          <p className="dashboard-copy">Submit a fix, watch it get reviewed, and spend the points you earn.</p>
         </div>
-      </header>
+      </div>
 
-      <main className="dash-shell">
-        <DashboardWorkspace user={profile} balance={dbUser?.balance ?? 0} />
-      </main>
+      <div className="stat-grid">
+        {stats.map((s) => (
+          <div className="dashboard-stat" key={s.label}>
+            <span className="dashboard-stat__label">{s.label}</span>
+            <span className="dashboard-stat__value">{s.value}</span>
+          </div>
+        ))}
+      </div>
 
-      <div className="caution-tape"></div>
-    </div>
+      <div className="quick-grid">
+        <Link className="quick-card" href="/dashboard/submit">
+          <h3>Submit a fix</h3>
+          <p>Log a PR you opened so it can be reviewed and rewarded.</p>
+        </Link>
+        <Link className="quick-card" href="/dashboard/submissions">
+          <h3>My submissions ({total})</h3>
+          <p>Track the status of everything you have sent in.</p>
+        </Link>
+        <Link className="quick-card" href="/shop">
+          <h3>Visit the shop</h3>
+          <p>Spend your points on rewards.</p>
+        </Link>
+      </div>
+    </>
   );
 }
