@@ -56,7 +56,7 @@ npm run dev
 - `ADMIN_HACK_CLUB_IDS`: Comma or space separated Hack Club identity ids that get the ADMIN role and access to `/admin`.
 - `HACKATIME_CLIENT_ID`, `HACKATIME_CLIENT_SECRET`: Hackatime OAuth app credentials (confidential app).
 - `HACKATIME_BYPASS_KEYS`: Optional rate-limit bypass header for the Hackatime public stats endpoint.
-- `HACKATIME_START_DATE`: Optional fixed epoch (YYYY-MM-DD, default `2025-01-01`) for Hackatime stats so tracked time is a stable running total. Set it to your program's start date to only count time logged after launch.
+- `HACKATIME_START_DATE`: Optional fixed epoch (YYYY-MM-DD, default `2026-01-01`) for Hackatime stats so tracked time is a stable running total. Set it to your program's start date to only count time logged after launch.
 - `APP_BASE_URL`: Optional but recommended in production. The public origin with no trailing slash (e.g. `https://your-app.onrender.com`). Used to build the OAuth `redirect_uri`. Without it the app derives the origin from `x-forwarded-proto` / `x-forwarded-host`.
 
 The OAuth `redirect_uri` is `<origin>/api/auth/callback`. It must be registered EXACTLY in your Hack Club OAuth app (same scheme and host, no trailing slash). Behind a TLS proxy the scheme must be `https`, so set `APP_BASE_URL` if the auto-detected origin is ever wrong.
