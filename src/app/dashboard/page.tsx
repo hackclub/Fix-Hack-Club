@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
-import { secondsToHours } from '@/lib/hackatime';
+import { secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { getDbUser, getSessionProfile } from '@/lib/session';
 
 export const runtime = 'nodejs';
@@ -13,16 +13,19 @@ export default async function DashboardOverview() {
   }
 
   const user = await getDbUser();
-  const [total, approved, pending] = await Promise.all([
+  const [total, approved, pending, pendingSubs] = await Promise.all([
     prisma.submission.count({ where: { hackClubId: profile.id } }),
     prisma.submission.count({ where: { hackClubId: profile.id, status: 'Approved' } }),
     prisma.submission.count({ where: { hackClubId: profile.id, status: 'Submitted' } }),
+    prisma.submission.findMany({ where: { hackClubId: profile.id, status: 'Submitted' }, select: { loggedSeconds: true } }),
   ]);
 
+  const pendingPoints = pendingSubs.reduce((sum, s) => sum + secondsToPoints(s.loggedSeconds), 0);
   const firstName = (profile.display_name || profile.first_name || 'there').split(' ')[0];
 
   const stats: { label: string; value: number | string }[] = [
     { label: 'Points', value: user?.balance ?? 0 },
+    { label: 'Pending points', value: pendingPoints },
     { label: 'Earned all-time', value: user?.totalEarned ?? 0 },
     { label: 'Approved fixes', value: approved },
     { label: 'Awaiting review', value: pending },

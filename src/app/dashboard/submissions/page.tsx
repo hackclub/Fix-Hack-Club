@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
-import { secondsToHours } from '@/lib/hackatime';
+import { secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { getSessionProfile } from '@/lib/session';
 
 export const runtime = 'nodejs';
@@ -47,6 +47,7 @@ export default async function MySubmissions() {
                   {s.category}
                   {s.repo ? ` · ${s.repo}` : ''}
                   {s.hackatimeProject ? ` · ${secondsToHours(s.loggedSeconds)}h logged` : ''}
+                  {s.hackatimeProject && s.status === 'Submitted' ? ` · ${secondsToPoints(s.loggedSeconds)} pending` : ''}
                 </p>
                 {s.notes ? <p>{s.notes}</p> : null}
                 <p>

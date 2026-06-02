@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
-import { secondsToHours } from '@/lib/hackatime';
+import { secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { getSessionProfile } from '@/lib/session';
 import { postDevlogAction } from '../actions';
 
@@ -51,16 +51,23 @@ export default async function ProjectPage({
               <span className="dashboard-stat__label">Logged time</span>
               <span className="dashboard-stat__value">{secondsToHours(submission.loggedSeconds)}h</span>
             </div>
-            <div className="dashboard-stat">
-              <span className="dashboard-stat__label">Points</span>
-              <span className="dashboard-stat__value">{submission.pointsAwarded}</span>
-            </div>
+            {submission.status === 'Approved' ? (
+              <div className="dashboard-stat">
+                <span className="dashboard-stat__label">Points earned</span>
+                <span className="dashboard-stat__value">{submission.pointsAwarded}</span>
+              </div>
+            ) : (
+              <div className="dashboard-stat">
+                <span className="dashboard-stat__label">Pending points</span>
+                <span className="dashboard-stat__value">{secondsToPoints(submission.loggedSeconds)}</span>
+              </div>
+            )}
           </div>
         </div>
 
         {submission.hackatimeProject ? (
           <p className="flash">
-            Linked Hackatime project: <strong>{submission.hackatimeProject}</strong>. Post a devlog to log your time, only logged time counts toward points.
+            Linked Hackatime project: <strong>{submission.hackatimeProject}</strong>. Posting devlogs logs your time and earns pending points (1 per hour). An admin pays them out when this project is shipped and approved.
           </p>
         ) : (
           <p className="flash flash--error">No Hackatime project is linked, so coding time cannot be counted for this project.</p>
