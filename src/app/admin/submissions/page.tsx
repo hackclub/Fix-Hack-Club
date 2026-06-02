@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
 import { secondsToHours } from '@/lib/hackatime';
+import { REJECTION_REASONS } from '@/lib/reviews';
 import { approveSubmissionAction, rejectSubmissionAction } from '../actions';
 
 export const runtime = 'nodejs';
@@ -25,7 +26,7 @@ export default async function AdminSubmissions() {
         <div className="dash-pagehead__copy">
           <p className="auth-card__eyebrow">Review</p>
           <h1 className="dashboard-title">Submissions</h1>
-          <p className="dashboard-copy">Approve a fix and set the points to award, or reject it.</p>
+          <p className="dashboard-copy">Approve a fix and set the points to award, or reject it with a reason.</p>
         </div>
       </div>
 
@@ -80,8 +81,15 @@ export default async function AdminSubmissions() {
                       {s.hackatimeProject ? 'Approve (pay hours)' : 'Approve'}
                     </button>
                   </form>
-                  <form action={rejectSubmissionAction}>
+                  <form action={rejectSubmissionAction} className="inline-form">
                     <input type="hidden" name="id" value={s.id} />
+                    <select className="note-input" name="reason" defaultValue={REJECTION_REASONS[0]} aria-label="Rejection reason">
+                      {REJECTION_REASONS.map((reason) => (
+                        <option key={reason} value={reason}>
+                          {reason}
+                        </option>
+                      ))}
+                    </select>
                     <button type="submit" className="btn btn-outline btn-sm">Reject</button>
                   </form>
                 </div>
@@ -106,6 +114,7 @@ export default async function AdminSubmissions() {
                 <th>By</th>
                 <th>Status</th>
                 <th>Points</th>
+                <th>Reason</th>
               </tr>
             </thead>
             <tbody>
@@ -117,6 +126,7 @@ export default async function AdminSubmissions() {
                     <span className={`status-badge status-${s.status.toLowerCase()}`}>{s.status}</span>
                   </td>
                   <td>{s.pointsAwarded}</td>
+                  <td>{s.status === 'Rejected' ? s.reviewNote || '—' : '—'}</td>
                 </tr>
               ))}
             </tbody>

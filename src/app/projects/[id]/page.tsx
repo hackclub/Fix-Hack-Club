@@ -89,6 +89,9 @@ export default async function ProjectPage({
             ) : submission.status === 'Rejected' ? (
               <>
                 <h3>Not approved</h3>
+                {submission.reviewNote ? (
+                  <p className="flash flash--error">Reason: {submission.reviewNote}</p>
+                ) : null}
                 <p className="dashboard-copy">
                   This wasn&apos;t approved. Make your changes, then submit it for review again.
                 </p>

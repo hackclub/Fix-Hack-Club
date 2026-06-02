@@ -31,6 +31,7 @@ export async function approveSubmission(submissionId: string, points: number, ad
         pointsAwarded: award,
         reviewedAt: new Date(),
         reviewedById: adminId,
+        reviewNote: null,
       },
     });
 
@@ -46,12 +47,15 @@ export async function approveSubmission(submissionId: string, points: number, ad
   });
 }
 
-// Reject a submission. If it had been approved, claw back the points.
-export async function rejectSubmission(submissionId: string, adminId: string) {
+// Reject a submission, optionally recording a reason. If it had been approved,
+// claw back the points.
+export async function rejectSubmission(submissionId: string, adminId: string, reason?: string) {
   const submission = await prisma.submission.findUnique({ where: { id: submissionId } });
   if (!submission) {
     throw new Error('Submission not found');
   }
+
+  const note = reason && reason.trim() ? reason.trim() : null;
 
   const author = await prisma.user.findUnique({ where: { hackClubId: submission.hackClubId } });
 
@@ -71,7 +75,7 @@ export async function rejectSubmission(submissionId: string, adminId: string) {
 
     await tx.submission.update({
       where: { id: submissionId },
-      data: { status: 'Rejected', pointsAwarded: 0, reviewedAt: new Date(), reviewedById: adminId },
+      data: { status: 'Rejected', pointsAwarded: 0, reviewedAt: new Date(), reviewedById: adminId, reviewNote: note },
     });
   });
 }

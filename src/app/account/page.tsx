@@ -123,6 +123,9 @@ export default async function AccountPage() {
                     {s.hackatimeProject && s.status === 'Submitted' ? ` · ${secondsToPoints(s.loggedSeconds)} pending` : ''}
                   </p>
                   {s.notes ? <p>{s.notes}</p> : null}
+                  {s.status === 'Rejected' && s.reviewNote ? (
+                    <p className="flash flash--error">Reason: {s.reviewNote}</p>
+                  ) : null}
                   <p>
                     <Link href={`/projects/${s.id}`}>
                       {s.status === 'Draft' ? 'Open draft → submit for review' : 'View project / post devlog'}

@@ -80,6 +80,7 @@ model Submission {
   loggedSeconds Int      @default(0) @map("logged_seconds")
   reviewedAt   DateTime? @map("reviewed_at")
   reviewedById String?   @map("reviewed_by_id")
+  reviewNote   String?   @map("review_note")
   createdAt    DateTime  @default(now()) @map("created_at")
 
   devlogs Devlog[]

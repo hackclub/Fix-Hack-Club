@@ -52,14 +52,14 @@ export async function approveSubmissionAction(formData: FormData) {
 
   await approveSubmission(id, points, admin.id);
   revalidatePath('/admin/submissions');
-  revalidatePath('/explore');
+  revalidatePath('/ships');
 }
 
 export async function rejectSubmissionAction(formData: FormData) {
   const admin = await requireAdmin();
-  await rejectSubmission(str(formData, 'id'), admin.id);
+  await rejectSubmission(str(formData, 'id'), admin.id, str(formData, 'reason'));
   revalidatePath('/admin/submissions');
-  revalidatePath('/explore');
+  revalidatePath('/ships');
 }
 
 // ---- Listings ----
@@ -85,6 +85,7 @@ export async function createListingAction(formData: FormData) {
     },
   });
   revalidatePath('/admin/listings');
+  revalidatePath('/projects');
   revalidatePath('/');
 }
 
@@ -105,6 +106,7 @@ export async function updateListingAction(formData: FormData) {
     },
   });
   revalidatePath('/admin/listings');
+  revalidatePath('/projects');
   revalidatePath('/');
 }
 
@@ -112,6 +114,7 @@ export async function deleteListingAction(formData: FormData) {
   await requireAdmin();
   await prisma.listing.delete({ where: { id: str(formData, 'id') } });
   revalidatePath('/admin/listings');
+  revalidatePath('/projects');
   revalidatePath('/');
 }
 
