@@ -1,5 +1,6 @@
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
+import { formatPoints } from '@/lib/hackatime';
 import { getDbUser } from '@/lib/session';
 import { redeemAction } from './actions';
 
@@ -44,7 +45,7 @@ export default async function ShopPage({
           <div className="dash-stats">
             <div className="dashboard-stat">
               <span className="dashboard-stat__label">Your points</span>
-              <span className="dashboard-stat__value">{user ? user.balance : '--'}</span>
+              <span className="dashboard-stat__value">{user ? formatPoints(user.balance) : '--'}</span>
             </div>
           </div>
         </div>
@@ -76,7 +77,7 @@ export default async function ShopPage({
                     <h3>{item.name}</h3>
                     <p>{item.description}</p>
                     <div className="shop-card__foot">
-                      <span className="balance-pill">{item.cost} pts</span>
+                      <span className="balance-pill">{formatPoints(item.cost)} pts</span>
                       {item.stock !== null ? (
                         <span className="shop-card__stock">{item.stock} left</span>
                       ) : null}
@@ -115,7 +116,7 @@ export default async function ShopPage({
                       <span className={`status-badge status-${order.status}`}>{order.status}</span>
                     </div>
                     <p>
-                      {order.cost} pts
+                      {formatPoints(order.cost)} pts
                       {order.fulfillmentNote ? ` · ${order.fulfillmentNote}` : ''}
                     </p>
                   </article>

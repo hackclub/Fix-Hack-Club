@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { isAdminId } from '@/lib/admin';
+import { formatPoints } from '@/lib/hackatime';
 import { getDbUser, getSessionProfile } from '@/lib/session';
 import HeaderNav from './HeaderNav';
 
@@ -22,7 +23,7 @@ export default async function SiteHeader() {
       <div className="dash-topbar__right">
         {user ? (
           <Link className="balance-pill" href="/account">
-            {user.balance} pts
+            {formatPoints(user.balance)} pts
           </Link>
         ) : null}
         {profile ? (

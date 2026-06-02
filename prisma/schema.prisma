@@ -46,8 +46,8 @@ model User {
   verificationStatus String?   @map("verification_status")
   avatar             String?
   role               Role      @default(MEMBER)
-  balance            Int       @default(0)
-  totalEarned        Int       @default(0) @map("total_earned")
+  balance            Float     @default(0)
+  totalEarned        Float     @default(0) @map("total_earned")
   bio                String?
   hackatimeUserId    String?   @map("hackatime_user_id")
   hackatimeUsername  String?   @map("hackatime_username")
@@ -75,7 +75,7 @@ model Submission {
   category     String    @default("Other")
   notes        String    @default("")
   status       String    @default("Submitted")
-  pointsAwarded Int      @default(0) @map("points_awarded")
+  pointsAwarded Float    @default(0) @map("points_awarded")
   hackatimeProject String? @map("hackatime_project")
   loggedSeconds Int      @default(0) @map("logged_seconds")
   reviewedAt   DateTime? @map("reviewed_at")
@@ -108,7 +108,7 @@ model Devlog {
 model LedgerEntry {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
-  delta     Int
+  delta     Float
   reason    String   @default("")
   createdAt DateTime @default(now()) @map("created_at")
 

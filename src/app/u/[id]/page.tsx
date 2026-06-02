@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
+import { formatPoints } from '@/lib/hackatime';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -45,7 +46,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           <div className="dash-stats">
             <div className="dashboard-stat">
               <span className="dashboard-stat__label">Points earned</span>
-              <span className="dashboard-stat__value">{user.totalEarned}</span>
+              <span className="dashboard-stat__value">{formatPoints(user.totalEarned)}</span>
             </div>
             <div className="dashboard-stat">
               <span className="dashboard-stat__label">Fixes shipped</span>
@@ -67,7 +68,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
                 <article className="dashboard-list__item" key={s.id}>
                   <div className="dashboard-list__item-head">
                     <h4>{s.title}</h4>
-                    <span>+{s.pointsAwarded} pts</span>
+                    <span className="balance-pill">+{formatPoints(s.pointsAwarded)} pts</span>
                   </div>
                   <p>
                     {s.category}

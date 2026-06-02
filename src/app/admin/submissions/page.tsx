@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
-import { secondsToHours } from '@/lib/hackatime';
+import { formatPoints, secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { REJECTION_REASONS } from '@/lib/reviews';
 import { approveSubmissionAction, rejectSubmissionAction } from '../actions';
 
@@ -51,7 +51,7 @@ export default async function AdminSubmissions() {
                   {s.notes ? <p className="admin-row__notes">{s.notes}</p> : null}
                   {s.hackatimeProject ? (
                     <p className="admin-row__meta">
-                      Hackatime: <strong>{s.hackatimeProject}</strong> · {secondsToHours(s.loggedSeconds)}h logged ({s._count.devlogs} devlog{s._count.devlogs === 1 ? '' : 's'}) · pays {Math.floor(s.loggedSeconds / 3600)} pts
+                      Hackatime: <strong>{s.hackatimeProject}</strong> · {secondsToHours(s.loggedSeconds)}h logged ({s._count.devlogs} devlog{s._count.devlogs === 1 ? '' : 's'}) · pays {formatPoints(secondsToPoints(s.loggedSeconds))} pts
                     </p>
                   ) : null}
                   <p className="admin-row__meta">
@@ -73,6 +73,7 @@ export default async function AdminSubmissions() {
                         type="number"
                         name="points"
                         min={0}
+                        step={0.1}
                         defaultValue={10}
                         aria-label="Points to award"
                       />
@@ -125,7 +126,7 @@ export default async function AdminSubmissions() {
                   <td>
                     <span className={`status-badge status-${s.status.toLowerCase()}`}>{s.status}</span>
                   </td>
-                  <td>{s.pointsAwarded}</td>
+                  <td>{formatPoints(s.pointsAwarded)}</td>
                   <td>{s.status === 'Rejected' ? s.reviewNote || '—' : '—'}</td>
                 </tr>
               ))}

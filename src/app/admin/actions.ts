@@ -34,6 +34,12 @@ function int(formData: FormData, name: string, fallback = 0): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
+// Like int(), but keeps decimals — used for fractional points (0.1 granularity).
+function num(formData: FormData, name: string, fallback = 0): number {
+  const value = parseFloat(String(formData.get(name) ?? ''));
+  return Number.isFinite(value) ? value : fallback;
+}
+
 // ---- Submissions ----
 // Points = 1 per hour of the linked Hackatime project (fetched live by the
 // author's Hackatime user id). Submissions without a linked project fall back
@@ -43,7 +49,7 @@ export async function approveSubmissionAction(formData: FormData) {
   const id = str(formData, 'id');
 
   const submission = await prisma.submission.findUnique({ where: { id } });
-  let points = int(formData, 'points', 0);
+  let points = num(formData, 'points', 0);
 
   // Points come from logged (devlogged) time only: 1 per hour of loggedSeconds.
   if (submission?.hackatimeProject) {
@@ -179,6 +185,6 @@ export async function refundOrderAction(formData: FormData) {
 // ---- Users ----
 export async function adjustBalanceAction(formData: FormData) {
   await requireAdmin();
-  await adjustBalance(str(formData, 'userId'), int(formData, 'delta', 0), str(formData, 'reason'));
+  await adjustBalance(str(formData, 'userId'), num(formData, 'delta', 0), str(formData, 'reason'));
   revalidatePath('/admin/users');
 }

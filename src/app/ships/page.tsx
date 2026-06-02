@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
+import { formatPoints } from '@/lib/hackatime';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -52,7 +53,7 @@ export default async function ShipsPage() {
                         <h3 className="feed-item__title">
                           <Link href={`/projects/${s.id}`}>{s.title}</Link>
                         </h3>
-                        <span className="balance-pill">+{s.pointsAwarded} pts</span>
+                        <span className="balance-pill">+{formatPoints(s.pointsAwarded)} pts</span>
                       </div>
                       {s.notes ? <p className="feed-item__notes">{s.notes}</p> : null}
                       <div className="feed-item__meta">
@@ -89,7 +90,7 @@ export default async function ShipsPage() {
                       <Link className="leaderboard__name" href={`/u/${u.id}`}>
                         {u.displayName || 'Member'}
                       </Link>
-                      <span className="leaderboard__pts">{u.totalEarned}</span>
+                      <span className="leaderboard__pts">{formatPoints(u.totalEarned)}</span>
                     </li>
                   ))}
                 </ol>

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db';
+import { formatPoints } from '@/lib/hackatime';
 import { adjustBalanceAction } from '../actions';
 
 export const runtime = 'nodejs';
@@ -35,13 +36,13 @@ export default async function AdminUsers() {
                     {u.role === 'ADMIN' ? <span className="status-badge status-approved">Admin</span> : null}
                   </h4>
                   <p className="admin-row__meta">
-                    {u.email || 'no email'} · balance {u.balance} · earned {u.totalEarned}
+                    {u.email || 'no email'} · balance {formatPoints(u.balance)} · earned {formatPoints(u.totalEarned)}
                   </p>
                 </div>
                 <div className="admin-row__actions">
                   <form action={adjustBalanceAction} className="inline-form">
                     <input type="hidden" name="userId" value={u.id} />
-                    <input className="points-input" type="number" name="delta" placeholder="+/-" aria-label="Point delta" />
+                    <input className="points-input" type="number" name="delta" step={0.1} placeholder="+/-" aria-label="Point delta" />
                     <input className="note-input" name="reason" placeholder="Reason" />
                     <button type="submit" className="btn btn-primary btn-sm">Adjust</button>
                   </form>

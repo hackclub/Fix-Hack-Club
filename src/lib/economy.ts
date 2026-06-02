@@ -9,7 +9,7 @@ export async function approveSubmission(submissionId: string, points: number, ad
     throw new Error('Submission not found');
   }
 
-  const award = Number.isFinite(points) && points > 0 ? Math.floor(points) : 0;
+  const award = Number.isFinite(points) && points > 0 ? Math.round(points * 10) / 10 : 0;
   const author = await prisma.user.findUnique({ where: { hackClubId: submission.hackClubId } });
 
   await prisma.$transaction(async (tx) => {
@@ -80,9 +80,9 @@ export async function rejectSubmission(submissionId: string, adminId: string, re
   });
 }
 
-// Manual admin balance adjustment (positive or negative).
+// Manual admin balance adjustment (positive or negative), at 0.1 granularity.
 export async function adjustBalance(userId: string, delta: number, reason: string) {
-  const amount = Math.trunc(delta);
+  const amount = Math.round(delta * 10) / 10;
   if (!Number.isFinite(amount) || amount === 0) {
     return;
   }

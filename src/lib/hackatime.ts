@@ -100,10 +100,19 @@ export async function fetchHackatimeProjectSeconds(uid: string, projectName: str
   return Number(data?.total_seconds) || 0;
 }
 
+// Points are earned at 1 per hour, credited at 0.1-point (6-minute) granularity.
+// Floored so time is never rounded up into points the member hasn't logged yet.
 export function secondsToPoints(seconds: number): number {
-  return Math.floor((seconds || 0) / 3600);
+  return Math.floor(((seconds || 0) / 3600) * 10) / 10;
 }
 
 export function secondsToHours(seconds: number): number {
   return Math.round(((seconds || 0) / 3600) * 10) / 10;
+}
+
+// Display helper: show a points value to at most one decimal place, dropping a
+// trailing ".0" (5 -> "5", 5.5 -> "5.5"). Also rounds away floating-point drift.
+export function formatPoints(value: number): string {
+  const rounded = Math.round((value || 0) * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }

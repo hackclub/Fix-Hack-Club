@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
-import { secondsToHours, secondsToPoints } from '@/lib/hackatime';
+import { formatPoints, secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { getDbUser, getSessionProfile } from '@/lib/session';
 
 export const runtime = 'nodejs';
@@ -58,9 +58,9 @@ export default async function AccountPage() {
   const displayName = profile.display_name || profile.first_name || 'Hack Club member';
 
   const stats: { label: string; value: number | string }[] = [
-    { label: 'Points', value: user?.balance ?? 0 },
-    { label: 'Pending points', value: pendingPoints },
-    { label: 'Earned all-time', value: user?.totalEarned ?? 0 },
+    { label: 'Points', value: formatPoints(user?.balance ?? 0) },
+    { label: 'Pending points', value: formatPoints(pendingPoints) },
+    { label: 'Earned all-time', value: formatPoints(user?.totalEarned ?? 0) },
     { label: 'Approved fixes', value: approved },
     { label: 'Awaiting review', value: pending },
     { label: 'Drafts', value: drafts },
@@ -122,7 +122,7 @@ export default async function AccountPage() {
                     <span className="ledger__date">{new Date(entry.createdAt).toLocaleDateString()}</span>
                   </div>
                   <span className={`ledger__delta ${entry.delta >= 0 ? 'is-pos' : 'is-neg'}`}>
-                    {entry.delta >= 0 ? `+${entry.delta}` : entry.delta}
+                    {entry.delta >= 0 ? `+${formatPoints(entry.delta)}` : formatPoints(entry.delta)}
                   </span>
                 </div>
               ))}

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
-import { secondsToHours, secondsToPoints } from '@/lib/hackatime';
+import { formatPoints, secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { getSessionProfile } from '@/lib/session';
 import { postDevlogAction, submitForReviewAction } from '../actions';
 
@@ -54,12 +54,12 @@ export default async function ProjectPage({
             {submission.status === 'Approved' ? (
               <div className="dashboard-stat">
                 <span className="dashboard-stat__label">Points earned</span>
-                <span className="dashboard-stat__value">{submission.pointsAwarded}</span>
+                <span className="dashboard-stat__value">{formatPoints(submission.pointsAwarded)}</span>
               </div>
             ) : (
               <div className="dashboard-stat">
                 <span className="dashboard-stat__label">Pending points</span>
-                <span className="dashboard-stat__value">{secondsToPoints(submission.loggedSeconds)}</span>
+                <span className="dashboard-stat__value">{formatPoints(secondsToPoints(submission.loggedSeconds))}</span>
               </div>
             )}
           </div>

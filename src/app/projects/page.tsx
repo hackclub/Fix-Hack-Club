@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
 import { prisma } from '@/lib/db';
-import { secondsToHours, secondsToPoints } from '@/lib/hackatime';
+import { formatPoints, secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { getSessionProfile } from '@/lib/session';
 
 export const runtime = 'nodejs';
@@ -71,14 +71,14 @@ export default async function ProjectsPage() {
                     <h4>{s.title}</h4>
                     <span className={`status-badge status-${s.status.toLowerCase()}`}>
                       {s.status}
-                      {s.status === 'Approved' && s.pointsAwarded ? ` · +${s.pointsAwarded}` : ''}
+                      {s.status === 'Approved' && s.pointsAwarded ? ` · +${formatPoints(s.pointsAwarded)}` : ''}
                     </span>
                   </div>
                   <p>
                     {s.category}
                     {s.repo ? ` · ${s.repo}` : ''}
                     {s.hackatimeProject ? ` · ${secondsToHours(s.loggedSeconds)}h logged` : ''}
-                    {s.hackatimeProject && s.status === 'Submitted' ? ` · ${secondsToPoints(s.loggedSeconds)} pending` : ''}
+                    {s.hackatimeProject && s.status === 'Submitted' ? ` · ${formatPoints(secondsToPoints(s.loggedSeconds))} pending` : ''}
                   </p>
                   {s.notes ? <p>{s.notes}</p> : null}
                   {s.status === 'Rejected' && s.reviewNote ? (
