@@ -1,0 +1,38 @@
+name: Sync Leaderboard
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - run: npm run leaderboard:sync
+        env:
+          AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git add public/leaderboard.json
+
+          git diff --cached --quiet || git commit -m "Update leaderboard"
+
+          git push
