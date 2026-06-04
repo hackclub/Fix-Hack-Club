@@ -7,15 +7,15 @@ const base = new Airtable({
 
 const records = [];
 
-await base("Table 1")
+await base("contributions")
   .select({
-    sort: [{ field: "Contributions", direction: "desc" }],
+    sort: [{ field: "number of contributions", direction: "desc" }],
   })
   .eachPage((pageRecords, fetchNextPage) => {
     pageRecords.forEach((record) => {
       records.push({
-        name: record.get("Name"),
-        score: record.get("Contributions") || 0,
+        name: record.get("github username"),
+        score: record.get("number of contributions") || 0,
       });
     });
 
