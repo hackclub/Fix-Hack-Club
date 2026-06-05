@@ -8,7 +8,14 @@
     "bot_user": {
       "display_name": "Mergeus",
       "always_online": true
-    }
+    },
+    "slash_commands": [
+      {
+        "command": "/bye",
+        "description": "Tell Mergeus to stop replying in this thread permanently",
+        "should_escape": false
+      }
+    ]
   },
   "oauth_config": {
     "scopes": {
@@ -17,7 +24,8 @@
         "chat:write",
         "im:history",
         "im:write",
-        "channels:history"
+        "channels:history",
+        "commands"
       ]
     }
   },

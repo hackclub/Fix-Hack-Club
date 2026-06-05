@@ -166,18 +166,44 @@ async function getHistory(channel, threadTs, botId) {
 // Mergeus only operates in this channel.
 const ALLOWED_CHANNEL = 'C0B8CPJ3TT7';
 
-// Threads where Mergeus has been asked to go quiet (/close or /bye).
-// Stored in memory — resets on container restart, which is intentional.
+// This string is posted (hidden in a closing message) so the closed state
+// survives container restarts — it lives in the Slack thread history forever.
+const CLOSE_MARKER = '​[MERGEUS_CLOSED]​'; // zero-width spaces hide it visually
+
+// Fast in-memory cache of closed thread timestamps (avoids repeat API calls
+// once we've already discovered a thread is closed this session).
 const closedThreads = new Set();
 
-// Returns true if Mergeus has already posted in this thread (so we should
-// keep engaging with replies even without an @mention).
-async function isMergeusInThread(channel, threadTs) {
+// Fetch the thread history and determine:
+//   'absent'  — Mergeus has never posted here (ignore the message)
+//   'active'  — Mergeus is in the thread and should respond
+//   'closed'  — /bye was used; Mergeus should stay silent permanently
+async function getThreadStatus(channel, threadTs) {
+  if (closedThreads.has(threadTs)) return 'closed';
   const botId = await getBotId();
-  const d = await slackApi('conversations.replies', { channel, ts: threadTs, limit: 30 });
-  if (!d.ok || !Array.isArray(d.messages)) return false;
-  // Skip index 0 (the root post) and look for any message from our bot.
-  return d.messages.slice(1).some(m => m.user === botId || (m.bot_id && m.user === botId));
+  const d = await slackApi('conversations.replies', { channel, ts: threadTs, limit: 50 });
+  if (!d.ok || !Array.isArray(d.messages)) return 'absent';
+  let botPresent = false;
+  for (const m of d.messages.slice(1)) {
+    if (m.text?.includes(CLOSE_MARKER)) {
+      closedThreads.add(threadTs); // cache it
+      return 'closed';
+    }
+    if (m.user === botId || m.bot_id) botPresent = true;
+  }
+  return botPresent ? 'active' : 'absent';
+}
+
+// Called by both the message handler (/close text command) and the
+// slash-command handler (/bye). Marks the thread closed persistently.
+async function closeThread(channel, threadTs) {
+  closedThreads.add(threadTs);
+  await slackApi('chat.postMessage', {
+    channel,
+    thread_ts: threadTs,
+    // The zero-width marker is invisible; the visible text is user-facing.
+    text: `Sounds good — I'll leave this thread alone from now on. 🔒${CLOSE_MARKER}`,
+  });
 }
 
 async function handleEvent(event) {
@@ -195,30 +221,16 @@ async function handleEvent(event) {
 
   const threadTs = event.thread_ts ?? event.ts;
   const text = strip(event.text ?? '');
-  const lc = text.toLowerCase().trim();
 
-  // ── /close  or  /bye — go quiet in this thread ──────────────────────────
-  if (lc === '/close' || lc === '/bye') {
-    closedThreads.add(threadTs);
-    await slackApi('chat.postMessage', {
-      channel: event.channel,
-      thread_ts: threadTs,
-      text: lc === '/close'
-        ? 'Thread marked as resolved ✅ Feel free to ping me if anything else comes up!'
-        : 'See ya! 🦕 Start a new message if you need me again.',
-    });
-    return;
-  }
-
-  // Ignore closed threads.
-  if (closedThreads.has(threadTs)) return;
-
-  // For thread replies (no @mention), only engage if Mergeus is already in
-  // the thread — otherwise it would reply to every message in the channel.
+  // For thread replies (no @mention), check whether Mergeus is active or
+  // closed in this thread. Mentions always get a response.
   if (isThreadReply && !isMention) {
-    const alreadyIn = await isMergeusInThread(event.channel, threadTs);
-    if (!alreadyIn) return;
+    const status = await getThreadStatus(event.channel, threadTs);
+    if (status !== 'active') return; // 'absent' or 'closed'
   }
+
+  // Closed threads: silently ignore even mentions (the user said /bye).
+  if (closedThreads.has(threadTs)) return;
 
   if (!text) {
     await slackApi('chat.postMessage', {
@@ -315,6 +327,28 @@ async function connect() {
       const event = envelope.payload?.event;
       if (event) {
         handleEvent(event).catch(err => console.error('[bot] event error:', err.message));
+      }
+    }
+
+    if (envelope.type === 'slash_commands') {
+      const cmd      = envelope.payload?.command;
+      const threadTs = envelope.payload?.thread_ts;
+      const channel  = envelope.payload?.channel_id;
+
+      if ((cmd === '/bye' || cmd === '/close') && channel) {
+        if (threadTs) {
+          // ACK the slash command silently (we'll post into the thread instead).
+          ws.send(JSON.stringify({ envelope_id: envelope.envelope_id, payload: {} }));
+          closeThread(channel, threadTs).catch(err =>
+            console.error('[bot] closeThread error:', err.message),
+          );
+        } else {
+          // No thread context — tell the user to run it from inside a thread.
+          ws.send(JSON.stringify({
+            envelope_id: envelope.envelope_id,
+            payload: { text: 'Run `/bye` from inside a thread to silence me there permanently.' },
+          }));
+        }
       }
     }
   });
