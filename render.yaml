@@ -30,7 +30,5 @@ services:
         sync: false
       - key: SLACK_BOT_TOKEN
         sync: false
-      - key: HACKCLUB_AI_KEY
-        sync: false
       - key: SLACK_ADMIN_IDS
         sync: false
