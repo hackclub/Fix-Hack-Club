@@ -18,12 +18,10 @@ oauth_config:
       - channels:history
 
 settings:
+  socket_mode_enabled: true
   event_subscriptions:
-    # Replace with your actual Render URL before uploading.
-    request_url: https://YOUR_APP.onrender.com/api/slack/events
     bot_events:
       - app_mention
       - message.im
   org_deploy_enabled: false
-  socket_mode_enabled: false
   token_rotation_enabled: false

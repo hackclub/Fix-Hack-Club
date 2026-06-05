@@ -24,9 +24,6 @@ DIRECT_URL="$(clean_db_url "${DIRECT_URL:-$DATABASE_URL}")"
 export DIRECT_URL
 
 # ── Safe diagnostic ──────────────────────────────────────────────────────────
-# Print ONLY the scheme (the text before "://") — never the credentials/host.
-# This makes a misconfigured DATABASE_URL obvious in the deploy logs without
-# leaking any secret material.
 scheme="$(printf '%s' "$DATABASE_URL" | sed -n 's|^\([a-zA-Z0-9+.-]*\)://.*|\1|p')"
 if [ -z "$DATABASE_URL" ]; then
   echo "ERROR: DATABASE_URL is empty. Set it in the Render dashboard (use the Internal Database URL)." >&2
@@ -52,6 +49,14 @@ else
   "$PRISMA" db push --skip-generate
 fi
 
-# ── Server ───────────────────────────────────────────────────────────────────
+# ── Slack bot (Socket Mode, background process) ───────────────────────────────
+# Starts only when all three required vars are set so the app works fine
+# without Slack configured.
+if [ -n "${SLACK_APP_TOKEN}" ] && [ -n "${SLACK_BOT_TOKEN}" ] && [ -n "${OPENROUTER_API_KEY}" ]; then
+  echo "Starting Pullquests Slack bot (Socket Mode)..."
+  node bot.mjs &
+fi
+
+# ── Next.js server ───────────────────────────────────────────────────────────
 echo "Starting Next.js server..."
 exec node server.js

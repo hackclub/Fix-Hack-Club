@@ -26,9 +26,9 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
-      - key: SLACK_BOT_TOKEN
+      - key: SLACK_APP_TOKEN
         sync: false
-      - key: SLACK_SIGNING_SECRET
+      - key: SLACK_BOT_TOKEN
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false
