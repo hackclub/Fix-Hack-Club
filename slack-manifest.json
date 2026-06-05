@@ -26,7 +26,8 @@
     "event_subscriptions": {
       "bot_events": [
         "app_mention",
-        "message.im"
+        "message.im",
+        "message.channels"
       ]
     },
     "org_deploy_enabled": false,

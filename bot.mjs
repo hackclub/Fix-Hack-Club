@@ -166,17 +166,59 @@ async function getHistory(channel, threadTs, botId) {
 // Mergeus only operates in this channel.
 const ALLOWED_CHANNEL = 'C0B8CPJ3TT7';
 
+// Threads where Mergeus has been asked to go quiet (/close or /bye).
+// Stored in memory — resets on container restart, which is intentional.
+const closedThreads = new Set();
+
+// Returns true if Mergeus has already posted in this thread (so we should
+// keep engaging with replies even without an @mention).
+async function isMergeusInThread(channel, threadTs) {
+  const botId = await getBotId();
+  const d = await slackApi('conversations.replies', { channel, ts: threadTs, limit: 30 });
+  if (!d.ok || !Array.isArray(d.messages)) return false;
+  // Skip index 0 (the root post) and look for any message from our bot.
+  return d.messages.slice(1).some(m => m.user === botId || (m.bot_id && m.user === botId));
+}
+
 async function handleEvent(event) {
   // Only respond in the allowed channel; ignore everything else.
   if (event.channel !== ALLOWED_CHANNEL) return;
 
   // Ignore bot messages to prevent loops.
-  const isDM      = event.type === 'message' && event.channel_type === 'im';
-  const isMention = event.type === 'app_mention';
-  if ((!isDM && !isMention) || event.bot_id || event.subtype === 'bot_message') return;
+  if (event.bot_id || event.subtype === 'bot_message') return;
+
+  const isDM          = event.type === 'message' && event.channel_type === 'im';
+  const isMention     = event.type === 'app_mention';
+  const isThreadReply = event.type === 'message' && Boolean(event.thread_ts) && !isDM;
+
+  if (!isDM && !isMention && !isThreadReply) return;
 
   const threadTs = event.thread_ts ?? event.ts;
   const text = strip(event.text ?? '');
+  const lc = text.toLowerCase().trim();
+
+  // ── /close  or  /bye — go quiet in this thread ──────────────────────────
+  if (lc === '/close' || lc === '/bye') {
+    closedThreads.add(threadTs);
+    await slackApi('chat.postMessage', {
+      channel: event.channel,
+      thread_ts: threadTs,
+      text: lc === '/close'
+        ? 'Thread marked as resolved ✅ Feel free to ping me if anything else comes up!'
+        : 'See ya! 🦕 Start a new message if you need me again.',
+    });
+    return;
+  }
+
+  // Ignore closed threads.
+  if (closedThreads.has(threadTs)) return;
+
+  // For thread replies (no @mention), only engage if Mergeus is already in
+  // the thread — otherwise it would reply to every message in the channel.
+  if (isThreadReply && !isMention) {
+    const alreadyIn = await isMergeusInThread(event.channel, threadTs);
+    if (!alreadyIn) return;
+  }
 
   if (!text) {
     await slackApi('chat.postMessage', {
@@ -187,7 +229,7 @@ async function handleEvent(event) {
     return;
   }
 
-  // Post a thinking indicator immediately so users know Mergeus is working.
+  // ── Post thinking indicator, then replace with the real reply ────────────
   const thinking = await slackApi('chat.postMessage', {
     channel: event.channel,
     thread_ts: threadTs,
@@ -201,7 +243,6 @@ async function handleEvent(event) {
 
   const reply = await chat(history, text);
 
-  // Replace the thinking message with the actual reply.
   if (thinking.ok && thinking.ts) {
     await slackApi('chat.update', {
       channel: event.channel,
@@ -209,7 +250,6 @@ async function handleEvent(event) {
       text: reply,
     });
   } else {
-    // Fallback: post as a new message if the update handle is missing.
     await slackApi('chat.postMessage', {
       channel: event.channel,
       thread_ts: threadTs,
