@@ -26,3 +26,11 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: SLACK_SIGNING_SECRET
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        sync: false
