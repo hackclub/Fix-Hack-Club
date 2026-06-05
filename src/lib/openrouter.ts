@@ -83,7 +83,7 @@ export async function chatCompletion(
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': process.env.APP_BASE_URL ?? 'https://fixhc.hackclub.com',
-      'X-Title': 'FixHC Pullquests Bot',
+      'X-Title': 'Mergeus',
     },
     body: JSON.stringify({
       model: process.env.OPENROUTER_MODEL ?? 'meta-llama/llama-3.3-70b-instruct:free',

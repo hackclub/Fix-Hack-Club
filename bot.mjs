@@ -1,5 +1,5 @@
 /**
- * Pullquests Slack Bot — Socket Mode
+ * Mergeus — Pullquests Slack Bot (Socket Mode)
  *
  * Connects to Slack over a persistent WebSocket (no inbound HTTP endpoint
  * needed). Started as a background process by docker-entrypoint.sh when
@@ -109,7 +109,7 @@ async function chat(history, userMessage) {
       Authorization: `Bearer ${OPENROUTER_KEY}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': APP_BASE_URL,
-      'X-Title': 'FixHC Pullquests Bot',
+      'X-Title': 'Mergeus',
     },
     body: JSON.stringify({ model: OPENROUTER_MODEL, messages, max_tokens: 900 }),
   });
@@ -176,7 +176,7 @@ async function handleEvent(event) {
     await slackApi('chat.postMessage', {
       channel: event.channel,
       thread_ts: threadTs,
-      text: "Hey! I'm the FixHC Pullquests bot 👋 Ask me anything about submitting fixes, earning points, or the shop.",
+      text: "Hey! I'm Mergeus 🦕 Ask me anything about submitting fixes, earning points, or the shop.",
     });
     return;
   }
@@ -270,5 +270,5 @@ async function connect() {
   });
 }
 
-console.log('[bot] Starting Pullquests Slack bot…');
+console.log('[bot] Starting Mergeus…');
 connect();
