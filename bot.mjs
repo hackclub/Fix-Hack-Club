@@ -167,6 +167,20 @@ const CLOSE_MARKER = '​[MERGEUS_CLOSED]​'; // zero-width spaces hide it visu
 // once we've already discovered a thread is closed this session).
 const closedThreads = new Set();
 
+// Dedup guard: Slack delivers the same message as both an app_mention and a
+// message event, and may re-deliver on reconnect. Track message ts to ensure
+// we only ever respond once per message.
+const seenEvents = new Set();
+function alreadySeen(key) {
+  if (!key) return false;
+  if (seenEvents.has(key)) return true;
+  seenEvents.add(key);
+  if (seenEvents.size > 1000) {
+    for (const k of Array.from(seenEvents).slice(0, 500)) seenEvents.delete(k);
+  }
+  return false;
+}
+
 // Fetch the thread history and determine:
 //   'absent'  — Mergeus has never posted here (ignore the message)
 //   'active'  — Mergeus is in the thread and should respond
@@ -203,29 +217,31 @@ async function handleEvent(event) {
   // Only respond in the allowed channel; ignore everything else.
   if (event.channel !== ALLOWED_CHANNEL) return;
 
-  // Ignore bot messages to prevent loops.
+  // Ignore bot messages (and our own) to prevent loops.
   if (event.bot_id || event.subtype === 'bot_message') return;
 
-  // Respond to all messages and mentions in the channel — no @ping required.
-  if (event.type !== 'message' && event.type !== 'app_mention') return;
+  // Only handle plain channel/DM messages. We intentionally ignore the
+  // app_mention event because Slack ALSO delivers every mention as a message
+  // event — handling both would double every reply.
+  if (event.type !== 'message') return;
+
+  // Ignore message edits, deletions, joins, file-shares without text, etc.
+  if (event.subtype) return;
+
+  // Dedup: never respond to the same message twice.
+  if (alreadySeen(event.ts)) return;
 
   const threadTs = event.thread_ts ?? event.ts;
   const text = strip(event.text ?? '');
+
+  // Nothing to answer (bare mention, emoji, attachment) — stay quiet.
+  if (!text) return;
 
   // Silently ignore threads the user closed with /bye.
   if (closedThreads.has(threadTs)) return;
   if (event.thread_ts) {
     const status = await getThreadStatus(event.channel, threadTs);
     if (status === 'closed') return;
-  }
-
-  if (!text) {
-    await slackApi('chat.postMessage', {
-      channel: event.channel,
-      thread_ts: threadTs,
-      text: "Hey! I'm Mergeus 🦕 Ask me anything about submitting fixes, earning points, or the shop.",
-    });
-    return;
   }
 
   // ── Post thinking indicator, then replace with the real reply ────────────
