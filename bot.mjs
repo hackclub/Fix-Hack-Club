@@ -16,6 +16,7 @@ import WebSocket from 'ws';
 const SLACK_APP_TOKEN = process.env.SLACK_APP_TOKEN ?? '';
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN ?? '';
 const HACKCLUB_AI_KEY = process.env.HACKCLUB_AI_KEY ?? '';
+const APP_BASE_URL    = process.env.APP_BASE_URL ?? 'https://fixhc.hackclub.com';
 
 if (!SLACK_APP_TOKEN || !SLACK_BOT_TOKEN || !HACKCLUB_AI_KEY) {
   console.log('[bot] SLACK_APP_TOKEN, SLACK_BOT_TOKEN or HACKCLUB_AI_KEY not set — skipping bot.');
