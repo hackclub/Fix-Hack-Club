@@ -52,7 +52,7 @@ fi
 # ── Slack bot (Socket Mode, background process) ───────────────────────────────
 # Starts only when all three required vars are set so the app works fine
 # without Slack configured.
-if [ -n "${SLACK_APP_TOKEN}" ] && [ -n "${SLACK_BOT_TOKEN}" ] && [ -n "${OPENROUTER_API_KEY}" ]; then
+if [ -n "${SLACK_APP_TOKEN}" ] && [ -n "${SLACK_BOT_TOKEN}" ] && [ -n "${HACKCLUB_AI_KEY}" ]; then
   echo "Starting Pullquests Slack bot (Socket Mode)..."
   node bot.mjs &
 fi

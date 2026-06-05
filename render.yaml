@@ -30,7 +30,5 @@ services:
         sync: false
       - key: SLACK_BOT_TOKEN
         sync: false
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: OPENROUTER_MODEL
+      - key: HACKCLUB_AI_KEY
         sync: false

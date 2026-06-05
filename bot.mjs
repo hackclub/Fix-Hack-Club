@@ -3,28 +3,22 @@
  *
  * Connects to Slack over a persistent WebSocket (no inbound HTTP endpoint
  * needed). Started as a background process by docker-entrypoint.sh when
- * SLACK_APP_TOKEN, SLACK_BOT_TOKEN, and OPENROUTER_API_KEY are all set.
+ * SLACK_APP_TOKEN, SLACK_BOT_TOKEN, and HACKCLUB_AI_KEY are all set.
  *
  * Required env vars:
- *   SLACK_APP_TOKEN      xapp-… (App-Level Token with connections:write scope)
- *   SLACK_BOT_TOKEN      xoxb-… (Bot Token)
- *   OPENROUTER_API_KEY   sk-or-…
- *
- * Optional:
- *   OPENROUTER_MODEL     defaults to meta-llama/llama-3.3-70b-instruct:free
- *   APP_BASE_URL         sent as HTTP-Referer to OpenRouter
+ *   SLACK_APP_TOKEN   xapp-… (App-Level Token with connections:write scope)
+ *   SLACK_BOT_TOKEN   xoxb-… (Bot Token)
+ *   HACKCLUB_AI_KEY   key from ai.hackclub.com dashboard
  */
 
 import WebSocket from 'ws';
 
-const SLACK_APP_TOKEN  = process.env.SLACK_APP_TOKEN  ?? '';
-const SLACK_BOT_TOKEN  = process.env.SLACK_BOT_TOKEN  ?? '';
-const OPENROUTER_KEY   = process.env.OPENROUTER_API_KEY ?? '';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL ?? 'meta-llama/llama-3.3-70b-instruct:free';
-const APP_BASE_URL     = process.env.APP_BASE_URL ?? 'https://fixhc.hackclub.com';
+const SLACK_APP_TOKEN = process.env.SLACK_APP_TOKEN ?? '';
+const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN ?? '';
+const HACKCLUB_AI_KEY = process.env.HACKCLUB_AI_KEY ?? '';
 
-if (!SLACK_APP_TOKEN || !SLACK_BOT_TOKEN || !OPENROUTER_KEY) {
-  console.log('[bot] SLACK_APP_TOKEN, SLACK_BOT_TOKEN or OPENROUTER_API_KEY not set — skipping bot.');
+if (!SLACK_APP_TOKEN || !SLACK_BOT_TOKEN || !HACKCLUB_AI_KEY) {
+  console.log('[bot] SLACK_APP_TOKEN, SLACK_BOT_TOKEN or HACKCLUB_AI_KEY not set — skipping bot.');
   process.exit(0);
 }
 
@@ -103,22 +97,20 @@ async function chat(history, userMessage) {
     ...history,
     { role: 'user', content: userMessage },
   ];
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  const res = await fetch('https://ai.hackclub.com/proxy/v1/chat/completions', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${OPENROUTER_KEY}`,
+      Authorization: `Bearer ${HACKCLUB_AI_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': APP_BASE_URL,
-      'X-Title': 'Mergeus',
     },
-    body: JSON.stringify({ model: OPENROUTER_MODEL, messages, max_tokens: 900 }),
+    body: JSON.stringify({ model: '~anthropic/claude-haiku-latest', messages, max_tokens: 900 }),
   });
   if (!res.ok) {
     const txt = await res.text().catch(() => '');
-    throw new Error(`OpenRouter ${res.status}: ${txt}`);
+    throw new Error(`Hack Club AI ${res.status}: ${txt}`);
   }
   const data = await res.json();
-  if (data.error?.message) throw new Error(`OpenRouter: ${data.error.message}`);
+  if (data.error?.message) throw new Error(`Hack Club AI: ${data.error.message}`);
   return data.choices?.[0]?.message?.content?.trim()
     ?? "I'm having trouble responding right now. Please ask in #pull-quests.";
 }
@@ -213,24 +205,17 @@ async function handleEvent(event) {
   // Ignore bot messages to prevent loops.
   if (event.bot_id || event.subtype === 'bot_message') return;
 
-  const isDM          = event.type === 'message' && event.channel_type === 'im';
-  const isMention     = event.type === 'app_mention';
-  const isThreadReply = event.type === 'message' && Boolean(event.thread_ts) && !isDM;
-
-  if (!isDM && !isMention && !isThreadReply) return;
+  // Respond to all messages and mentions in the channel — no @ping required.
+  if (event.type !== 'message' && event.type !== 'app_mention') return;
 
   const threadTs = event.thread_ts ?? event.ts;
-  const text = strip(event.text ?? '');
 
-  // For thread replies (no @mention), check whether Mergeus is active or
-  // closed in this thread. Mentions always get a response.
-  if (isThreadReply && !isMention) {
-    const status = await getThreadStatus(event.channel, threadTs);
-    if (status !== 'active') return; // 'absent' or 'closed'
-  }
-
-  // Closed threads: silently ignore even mentions (the user said /bye).
+  // Silently ignore threads the user closed with /bye.
   if (closedThreads.has(threadTs)) return;
+  if (event.thread_ts) {
+    const status = await getThreadStatus(event.channel, threadTs);
+    if (status === 'closed') return;
+  }
 
   if (!text) {
     await slackApi('chat.postMessage', {
