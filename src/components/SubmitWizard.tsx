@@ -41,7 +41,7 @@ export default function SubmitWizard({
   prefill,
   connected,
 }: {
-  action: (formData: FormData) => void;
+  action: (formData: FormData) => Promise<void>;
   projects: HProject[];
   prefill: Prefill;
   connected: boolean;

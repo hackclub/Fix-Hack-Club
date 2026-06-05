@@ -15,6 +15,9 @@ RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # ---- Build (the build script runs `prisma generate` then `next build`) ----
 FROM base AS builder
+# Cap Node's heap so the TS compiler doesn't OOM on low-RAM build servers.
+# Adjust if your Coolify/Render host has more headroom.
+ENV NODE_OPTIONS="--max-old-space-size=1536"
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
