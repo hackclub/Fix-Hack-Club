@@ -49,14 +49,6 @@ else
   "$PRISMA" db push --skip-generate
 fi
 
-# ── Slack ticket bot (Socket Mode, background process) ────────────────────────
-# Starts only when both Slack tokens are set, so the app works fine without
-# Slack configured.
-if [ -n "${SLACK_APP_TOKEN}" ] && [ -n "${SLACK_BOT_TOKEN}" ]; then
-  echo "Starting Mergeus ticket bot (Socket Mode)..."
-  node bot.mjs &
-fi
-
 # ── Next.js server ───────────────────────────────────────────────────────────
 echo "Starting Next.js server..."
 exec node server.js

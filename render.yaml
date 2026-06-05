@@ -26,9 +26,3 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
-      - key: SLACK_APP_TOKEN
-        sync: false
-      - key: SLACK_BOT_TOKEN
-        sync: false
-      - key: SLACK_ADMIN_IDS
-        sync: false
