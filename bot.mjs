@@ -210,6 +210,7 @@ async function handleEvent(event) {
   if (event.type !== 'message' && event.type !== 'app_mention') return;
 
   const threadTs = event.thread_ts ?? event.ts;
+  const text = strip(event.text ?? '');
 
   // Silently ignore threads the user closed with /bye.
   if (closedThreads.has(threadTs)) return;
