@@ -86,7 +86,7 @@ export async function chatCompletion(
       'X-Title': 'FixHC Pullquests Bot',
     },
     body: JSON.stringify({
-      model: process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3-haiku',
+      model: process.env.OPENROUTER_MODEL ?? 'meta-llama/llama-3.3-70b-instruct:free',
       messages,
       max_tokens: 900,
     }),
