@@ -1,0 +1,35 @@
+{
+  "display_information": {
+    "name": "Mergeus",
+    "description": "AI assistant for FixHC Pullquests - answers questions and gathers details before a human steps in.",
+    "background_color": "#f0ab00"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "Mergeus",
+      "always_online": true
+    }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "chat:write",
+        "im:history",
+        "im:write",
+        "channels:history"
+      ]
+    }
+  },
+  "settings": {
+    "socket_mode_enabled": true,
+    "event_subscriptions": {
+      "bot_events": [
+        "app_mention",
+        "message.im"
+      ]
+    },
+    "org_deploy_enabled": false,
+    "token_rotation_enabled": false
+  }
+}
