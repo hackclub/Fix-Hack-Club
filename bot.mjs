@@ -163,8 +163,14 @@ async function getHistory(channel, threadTs, botId) {
 
 // ── Event handler ──────────────────────────────────────────────────────────────
 
+// Mergeus only operates in this channel.
+const ALLOWED_CHANNEL = 'C0B8CPJ3TT7';
+
 async function handleEvent(event) {
-  // Only respond to DMs and @mentions; ignore bot messages to prevent loops.
+  // Only respond in the allowed channel; ignore everything else.
+  if (event.channel !== ALLOWED_CHANNEL) return;
+
+  // Ignore bot messages to prevent loops.
   const isDM      = event.type === 'message' && event.channel_type === 'im';
   const isMention = event.type === 'app_mention';
   if ((!isDM && !isMention) || event.bot_id || event.subtype === 'bot_message') return;
