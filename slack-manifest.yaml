@@ -1,6 +1,6 @@
 display_information:
   name: Mergeus
-  description: "Orpheus's fix-it cousin — AI assistant for FixHC Pullquests. Answers questions and gathers details before a human steps in."
+  description: "Orpheus's fix-it cousin. AI assistant for FixHC Pullquests - answers questions and gathers details before a human steps in."
   background_color: "#f0ab00"
 
 features:
