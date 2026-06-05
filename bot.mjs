@@ -187,6 +187,13 @@ async function handleEvent(event) {
     return;
   }
 
+  // Post a thinking indicator immediately so users know Mergeus is working.
+  const thinking = await slackApi('chat.postMessage', {
+    channel: event.channel,
+    thread_ts: threadTs,
+    text: '_Mergeus is thinking…_ 🦕',
+  });
+
   const botId  = await getBotId();
   const history = event.thread_ts
     ? await getHistory(event.channel, event.thread_ts, botId)
@@ -194,11 +201,21 @@ async function handleEvent(event) {
 
   const reply = await chat(history, text);
 
-  await slackApi('chat.postMessage', {
-    channel: event.channel,
-    thread_ts: threadTs,
-    text: reply,
-  });
+  // Replace the thinking message with the actual reply.
+  if (thinking.ok && thinking.ts) {
+    await slackApi('chat.update', {
+      channel: event.channel,
+      ts: thinking.ts,
+      text: reply,
+    });
+  } else {
+    // Fallback: post as a new message if the update handle is missing.
+    await slackApi('chat.postMessage', {
+      channel: event.channel,
+      thread_ts: threadTs,
+      text: reply,
+    });
+  }
 }
 
 // ── Socket Mode connection ─────────────────────────────────────────────────────
