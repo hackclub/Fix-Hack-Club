@@ -18,6 +18,19 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN ?? '';
 const HACKCLUB_AI_KEY = process.env.HACKCLUB_AI_KEY ?? '';
 const APP_BASE_URL    = process.env.APP_BASE_URL ?? 'https://fixhc.hackclub.com';
 
+// Comma-separated Slack user IDs of support/admins who may use the control
+// panel buttons (e.g. "U08J9R1TUT1,U012345"). Optional.
+const ADMIN_IDS = new Set(
+  (process.env.SLACK_ADMIN_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
+function adminMentions() {
+  return [...ADMIN_IDS].map((id) => `<@${id}>`).join(' ');
+}
+
 if (!SLACK_APP_TOKEN || !SLACK_BOT_TOKEN || !HACKCLUB_AI_KEY) {
   console.log('[bot] SLACK_APP_TOKEN, SLACK_BOT_TOKEN or HACKCLUB_AI_KEY not set — skipping bot.');
   process.exit(0);
@@ -85,9 +98,19 @@ DM Elias on Slack: https://hackclub.enterprise.slack.com/team/U08J9R1TUT1
   1. Their name
   2. Their Hack Club email or Slack ID
   3. The specific issue + any relevant URLs (PR link, project page, etc.)
-  Once you have all three, write a clear one-paragraph summary and tell them to DM Elias at https://hackclub.enterprise.slack.com/team/U08J9R1TUT1 or post in #pull-quests with the summary.
 - Stay on-topic. Politely decline questions unrelated to Pullquests / FixHC.
 - If you genuinely don't know something, say so and suggest reaching out to a human.
+
+## Handing off to a human (IMPORTANT)
+When — and only when — you have collected ALL THREE of (1) the person's name,
+(2) their email or Slack ID, and (3) a clear description of their issue with any
+relevant links, AND the issue genuinely needs a human support member:
+- Write a concise one-paragraph summary of the issue for the support team.
+- Then, on the VERY LAST line of your message, output the exact token \`[[HANDOFF]]\`
+  on its own line. Nothing after it.
+This token tells the system to notify support and stop the bot from replying.
+Do NOT output \`[[HANDOFF]]\` for normal questions you can answer yourself, and
+never mention the token to the user.
 `;
 
 // ── OpenRouter ─────────────────────────────────────────────────────────────────
@@ -146,12 +169,19 @@ async function getHistory(channel, threadTs, botId) {
   const d = await slackApi('conversations.replies', { channel, ts: threadTs, limit: 20 });
   if (!d.ok || !Array.isArray(d.messages)) return [];
   return d.messages
-    .slice(0, -1)
+    .slice(0, -1) // drop the current (latest) user message — passed separately
     .map(m => ({
       role: (m.bot_id || m.user === botId) ? 'assistant' : 'user',
       content: strip(m.text ?? ''),
     }))
-    .filter(m => m.content.length > 0);
+    // Exclude Mergeus's own system/control messages from the model context.
+    .filter(m =>
+      m.content.length > 0 &&
+      !m.content.includes('[MERGEUS_CLOSED]') &&
+      !m.content.includes('Support controls') &&
+      !m.content.includes('Support control') &&
+      !m.content.includes('is thinking'),
+    );
 }
 
 // ── Event handler ──────────────────────────────────────────────────────────────
@@ -201,16 +231,95 @@ async function getThreadStatus(channel, threadTs) {
   return botPresent ? 'active' : 'absent';
 }
 
-// Called by both the message handler (/close text command) and the
-// slash-command handler (/bye). Marks the thread closed persistently.
-async function closeThread(channel, threadTs) {
+// Mark a thread closed persistently and post a visible note. The hidden
+// CLOSE_MARKER makes the closed state survive container restarts.
+async function markClosed(channel, threadTs, visibleText) {
   closedThreads.add(threadTs);
   await slackApi('chat.postMessage', {
     channel,
     thread_ts: threadTs,
-    // The zero-width marker is invisible; the visible text is user-facing.
-    text: `Sounds good — I'll leave this thread alone from now on. 🔒${CLOSE_MARKER}`,
+    text: `${visibleText}${CLOSE_MARKER}`,
   });
+}
+
+// The control panel Mergeus posts as its first message in a help thread.
+// Support members use the buttons to stop the AI or mark the thread resolved.
+async function postControlPanel(channel, threadTs) {
+  await slackApi('chat.postMessage', {
+    channel,
+    thread_ts: threadTs,
+    text: 'Support controls', // fallback for notifications
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '🛠 *Support controls*\nMergeus is helping in this thread. Support can take over at any time.',
+        },
+      },
+      {
+        type: 'actions',
+        block_id: 'mergeus_controls',
+        elements: [
+          {
+            type: 'button',
+            action_id: 'mergeus_stop',
+            style: 'danger',
+            text: { type: 'plain_text', text: '🛑 Stop AI' },
+          },
+          {
+            type: 'button',
+            action_id: 'mergeus_resolve',
+            style: 'primary',
+            text: { type: 'plain_text', text: '✅ Mark resolved' },
+          },
+        ],
+      },
+    ],
+  });
+}
+
+// Handle a click on one of the control-panel buttons (block_actions payload).
+async function handleInteractive(payload) {
+  const action   = payload?.actions?.[0]?.action_id;
+  const userId   = payload?.user?.id;
+  const channel  = payload?.channel?.id;
+  const panelTs  = payload?.message?.ts;
+  const threadTs = payload?.message?.thread_ts ?? payload?.container?.thread_ts ?? panelTs;
+
+  if (!action || !channel || !threadTs) return;
+  if (channel !== ALLOWED_CHANNEL) return;
+
+  // Only support/admins may use the controls.
+  if (ADMIN_IDS.size > 0 && !ADMIN_IDS.has(userId)) {
+    await slackApi('chat.postEphemeral', {
+      channel,
+      user: userId,
+      thread_ts: threadTs,
+      text: 'Only support members can use these controls.',
+    });
+    return;
+  }
+
+  closedThreads.add(threadTs);
+
+  const resolved = action === 'mergeus_resolve';
+  const headline = resolved
+    ? `✅ *Resolved* by <@${userId}> — Mergeus will stop replying here.`
+    : `🛑 *AI stopped* by <@${userId}> — Mergeus will stay quiet in this thread.`;
+
+  // Update the panel in place: show the outcome, drop the buttons, and embed
+  // the close marker so the state persists across restarts.
+  if (panelTs) {
+    await slackApi('chat.update', {
+      channel,
+      ts: panelTs,
+      text: `${headline}${CLOSE_MARKER}`,
+      blocks: [{ type: 'section', text: { type: 'mrkdwn', text: headline } }],
+    });
+  } else {
+    await markClosed(channel, threadTs, headline);
+  }
 }
 
 async function handleEvent(event) {
@@ -237,11 +346,26 @@ async function handleEvent(event) {
   // Nothing to answer (bare mention, emoji, attachment) — stay quiet.
   if (!text) return;
 
-  // Silently ignore threads the user closed with /bye.
+  // Silently ignore threads that have been closed/resolved.
   if (closedThreads.has(threadTs)) return;
+
+  const isNewThread = !event.thread_ts;
+  const botId = await getBotId();
+
+  // For a reply inside an existing thread, only engage if Mergeus is already
+  // active there. This keeps it out of closed threads and human-only threads.
+  let history = [];
   if (event.thread_ts) {
     const status = await getThreadStatus(event.channel, threadTs);
-    if (status === 'closed') return;
+    if (status !== 'active') return; // 'closed' or 'absent'
+    // Fetch history BEFORE posting anything so the panel/thinking/current
+    // message don't leak into the model context.
+    history = await getHistory(event.channel, threadTs, botId);
+  }
+
+  // First engagement in this thread → post the support control panel.
+  if (isNewThread) {
+    await postControlPanel(event.channel, threadTs);
   }
 
   // ── Post thinking indicator, then replace with the real reply ────────────
@@ -251,25 +375,26 @@ async function handleEvent(event) {
     text: '_Mergeus is thinking…_ 🦕',
   });
 
-  const botId  = await getBotId();
-  const history = event.thread_ts
-    ? await getHistory(event.channel, event.thread_ts, botId)
-    : [];
+  let reply = await chat(history, text);
 
-  const reply = await chat(history, text);
+  // The AI signals "enough info gathered, hand off to a human" with this token.
+  const handoff = reply.includes('[[HANDOFF]]');
+  reply = reply.replace(/\[\[HANDOFF\]\]/g, '').trim();
 
   if (thinking.ok && thinking.ts) {
-    await slackApi('chat.update', {
-      channel: event.channel,
-      ts: thinking.ts,
-      text: reply,
-    });
+    await slackApi('chat.update', { channel: event.channel, ts: thinking.ts, text: reply });
   } else {
-    await slackApi('chat.postMessage', {
-      channel: event.channel,
-      thread_ts: threadTs,
-      text: reply,
-    });
+    await slackApi('chat.postMessage', { channel: event.channel, thread_ts: threadTs, text: reply });
+  }
+
+  // Handoff: post the closing note, ping support, and stop replying here.
+  if (handoff) {
+    const pings = adminMentions();
+    const note =
+      'Thanks — I believe I have gathered enough information. ' +
+      "I won't reply to this thread again; please wait for a support member." +
+      (pings ? `\n\n${pings} — a member needs help here. 👆` : '');
+    await markClosed(event.channel, threadTs, note);
   }
 }
 
@@ -333,6 +458,13 @@ async function connect() {
       }
     }
 
+    if (envelope.type === 'interactive') {
+      const payload = envelope.payload;
+      if (payload?.type === 'block_actions') {
+        handleInteractive(payload).catch(err => console.error('[bot] interactive error:', err.message));
+      }
+    }
+
     if (envelope.type === 'slash_commands') {
       const cmd      = envelope.payload?.command;
       const threadTs = envelope.payload?.thread_ts;
@@ -342,8 +474,8 @@ async function connect() {
         if (threadTs) {
           // ACK the slash command silently (we'll post into the thread instead).
           ws.send(JSON.stringify({ envelope_id: envelope.envelope_id, payload: {} }));
-          closeThread(channel, threadTs).catch(err =>
-            console.error('[bot] closeThread error:', err.message),
+          markClosed(channel, threadTs, "Sounds good — I'll leave this thread alone from now on. 🔒").catch(err =>
+            console.error('[bot] markClosed error:', err.message),
           );
         } else {
           // No thread context — tell the user to run it from inside a thread.
