@@ -375,7 +375,22 @@ async function handleEvent(event) {
     text: '_Mergeus is thinking…_ 🦕',
   });
 
-  let reply = await chat(history, text);
+  let reply;
+  try {
+    reply = await chat(history, text);
+  } catch (err) {
+    console.error('[bot] chat error:', err.message);
+    const outOfCredits = err.message.includes(' 402');
+    const msg = outOfCredits
+      ? 'Whoops :( Hack Club AI is out of credits — go poke someone else! 🦕'
+      : 'Whoops :( something went wrong reaching the AI. Please try again in a bit.';
+    if (thinking.ok && thinking.ts) {
+      await slackApi('chat.update', { channel: event.channel, ts: thinking.ts, text: msg });
+    } else {
+      await slackApi('chat.postMessage', { channel: event.channel, thread_ts: threadTs, text: msg });
+    }
+    return;
+  }
 
   // The AI signals "enough info gathered, hand off to a human" with this token.
   const handoff = reply.includes('[[HANDOFF]]');
