@@ -145,6 +145,20 @@ export default function SubmitWizard({
             </select>
           </label>
         </div>
+
+        <div className="dashboard-form__header" style={{ marginTop: 18 }}>
+          <p className="auth-card__eyebrow">Shipping address</p>
+          <h3>Where prizes ship (optional)</h3>
+          <p className="dashboard-copy">Used by the YSWS review program to send rewards. You can fill this in later.</p>
+        </div>
+        <div className="form-grid">
+          <label className="field"><span>Address line 1</span><input name="addressLine1" placeholder="Optional" /></label>
+          <label className="field"><span>Address line 2</span><input name="addressLine2" placeholder="Optional" /></label>
+          <label className="field"><span>City</span><input name="city" placeholder="Optional" /></label>
+          <label className="field"><span>State / Province</span><input name="state" placeholder="Optional" /></label>
+          <label className="field"><span>Country</span><input name="country" placeholder="Optional" /></label>
+          <label className="field"><span>ZIP / Postal code</span><input name="zip" placeholder="Optional" /></label>
+        </div>
       </div>
 
       {/* Step 2 — PR */}
@@ -178,6 +192,10 @@ export default function SubmitWizard({
             <option value="Other">Other</option>
           </select>
         </label>
+        <label className="field"><span>Playable / demo URL</span><input name="playableUrl" type="url" placeholder="Optional — live page or demo" /></label>
+        <label className="field"><span>Screenshot URL</span><input name="screenshotUrl" type="url" placeholder="Optional — link to a screenshot" /></label>
+        <label className="field"><span>Description</span><textarea name="description" rows={3} placeholder="What does this fix do? (shown publicly once approved)" /></label>
+        <label className="field"><span>How did you hear about this?</span><input name="heardAbout" placeholder="Optional" /></label>
       </div>
 
       {/* Step 3 — Submission (review) */}
@@ -194,8 +212,10 @@ export default function SubmitWizard({
           <div className="dash-profile__row"><dt>Project</dt><dd>{review.title || '—'}</dd></div>
           <div className="dash-profile__row"><dt>PR</dt><dd>{review.url || '—'}</dd></div>
           <div className="dash-profile__row"><dt>Repo</dt><dd>{review.repo || '—'}</dd></div>
+          <div className="dash-profile__row"><dt>Playable URL</dt><dd>{review.playableUrl || '—'}</dd></div>
           <div className="dash-profile__row"><dt>Hackatime</dt><dd>{review.hackatimeProject || 'Not linked'}</dd></div>
           <div className="dash-profile__row"><dt>Category</dt><dd>{review.category || 'Bug fix'}</dd></div>
+          <div className="dash-profile__row"><dt>Address</dt><dd>{[review.addressLine1, review.city, review.state, review.country].filter(Boolean).join(', ') || '—'}</dd></div>
         </dl>
         <p className="dashboard-copy">Your fix will be created as a draft — post devlogs as you work, then submit it for review.</p>
       </div>

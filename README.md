@@ -30,6 +30,14 @@ Submissions move through a **two-stage review**. A submission stays in `status: 
 1. **First-grade review (`reviewStage: "first"`)** — a reviewer or admin opens `/admin/review`, reads the fix, and records an approve/deny recommendation **with a reason**. This never awards points; it just advances the item to `reviewStage: "final"` and stores `firstReviewStatus` / `firstReviewNote`.
 2. **Final review (`reviewStage: "final"`)** — an admin opens `/admin/submissions`, sees the reviewer's recommendation and reason, and makes the final call: **approve** (awards points) or **reject** (records a reason). Admins can also clear the first stage themselves from `/admin/review`, so they can run a submission through both stages.
 
+## Unified YSWS export
+
+Submission + review data is stored to match the Hack Club **Unified YSWS** "Projects" review format and can be exported as a CSV the review program ingests.
+
+- **Where the data comes from:** the submit wizard collects submitter fields (playable URL, screenshot URL, description, "how did you hear about this?", and mailing address) alongside the existing identity fields; the first-grade review captures **"What are we doing well?"** and **"How can we improve?"**; the final review can set an optional **Override Hours Spent** + justification. Existing data (code URL, name, email, GitHub username, birthday, logged hours) is reused.
+- **Export:** admins click **Export review CSV** on `/admin/submissions` (route handler `GET /admin/submissions/export`, admin-only since it contains PII). It emits all non-draft submissions.
+- **Format:** the column header, order, and UTF-8 BOM match the program's export exactly (see `src/lib/ysws.ts`). `Status` is always `Pending Review` (the program decides downstream); the `Automation -` columns are left blank for the program's pipeline; the `Loops -` columns and `Time Taken` (logged Hackatime hours) are derived. Output uses LF line endings and RFC4180 quoting.
+
 ## Economy
 
 Members link a Hackatime project to a submission. When an admin gives final approval, points are paid at 1 per hour of that project's tracked time (fetched live from Hackatime). Submissions with no linked project fall back to a manual point value. Approving credits the author's balance and lifetime total and writes a ledger entry; rejecting an already-approved fix claws the points back. Points are spent in the shop, which creates an order (admins fulfill or refund). There is no voting.

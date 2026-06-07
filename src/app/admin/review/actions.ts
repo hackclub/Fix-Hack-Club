@@ -41,6 +41,8 @@ async function recordFirstReview(formData: FormData, decision: 'Approved' | 'Rej
   const reviewer = await requireReviewer();
   const id = str(formData, 'id');
   const reason = str(formData, 'reason');
+  const doingWell = str(formData, 'doingWell');
+  const improve = str(formData, 'improve');
 
   const submission = await prisma.submission.findUnique({ where: { id } });
   if (!submission || submission.status !== 'Submitted' || submission.reviewStage !== REVIEW_STAGE.FIRST) {
@@ -53,9 +55,13 @@ async function recordFirstReview(formData: FormData, decision: 'Approved' | 'Rej
     data: {
       reviewStage: REVIEW_STAGE.FINAL,
       firstReviewStatus: decision,
-      firstReviewNote: reason || null,
+      // On deny, keep the rejection reason as the note; on approve there's no
+      // rejection reason. The YSWS feedback lives in the two fields below.
+      firstReviewNote: decision === 'Rejected' ? reason || null : null,
       firstReviewedAt: new Date(),
       firstReviewedById: reviewer.id,
+      reviewDoingWell: doingWell || null,
+      reviewImprove: improve || null,
     },
   });
 

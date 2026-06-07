@@ -3,7 +3,7 @@ import { requireAdminOnly } from '@/lib/access';
 import { prisma } from '@/lib/db';
 import { formatPoints, secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { REJECTION_REASONS, REVIEW_STAGE } from '@/lib/reviews';
-import { approveSubmissionAction, rejectSubmissionAction } from '../actions';
+import { approveSubmissionAction, rejectSubmissionAction, setOverrideHoursAction } from '../actions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -39,6 +39,9 @@ export default async function AdminSubmissions() {
           <p className="dashboard-copy">
             A reviewer has taken a first look — their recommendation is shown below. You make the final call: approve and set the points, or reject with a reason.
           </p>
+        </div>
+        <div className="btn-row">
+          <a className="btn btn-outline btn-sm" href="/admin/submissions/export">⬇ Export review CSV</a>
         </div>
       </div>
 
@@ -118,6 +121,27 @@ export default async function AdminSubmissions() {
                       ))}
                     </select>
                     <button type="submit" className="btn btn-outline btn-sm">Reject</button>
+                  </form>
+                  <form action={setOverrideHoursAction} className="inline-form">
+                    <input type="hidden" name="id" value={s.id} />
+                    <input
+                      className="points-input"
+                      type="number"
+                      name="overrideHours"
+                      min={0}
+                      step={0.1}
+                      defaultValue={s.overrideHours ?? ''}
+                      placeholder="Override hrs"
+                      aria-label="Override hours spent (optional)"
+                    />
+                    <input
+                      className="note-input"
+                      name="overrideJustification"
+                      defaultValue={s.overrideHoursJustification ?? ''}
+                      placeholder="Override justification"
+                      aria-label="Override hours justification"
+                    />
+                    <button type="submit" className="btn btn-outline btn-sm">Save hours</button>
                   </form>
                 </div>
               </article>

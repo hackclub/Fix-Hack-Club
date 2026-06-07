@@ -96,6 +96,23 @@ model Submission {
   firstReviewNote   String?   @map("first_review_note")
   firstReviewedAt   DateTime? @map("first_reviewed_at")
   firstReviewedById String?   @map("first_reviewed_by_id")
+  // Unified YSWS export fields. Submitter-provided (collected in the submit
+  // wizard); Description reuses `notes` above. Mailing address is for prize
+  // fulfilment by the review program.
+  playableUrl    String? @map("playable_url")
+  heardAbout     String? @map("heard_about")
+  screenshotUrl  String? @map("screenshot_url")
+  addressLine1   String? @map("address_line1")
+  addressLine2   String? @map("address_line2")
+  city           String?
+  state          String?
+  country        String?
+  zip            String?
+  // Reviewer-provided during review (first-grade feedback + optional hours override).
+  reviewDoingWell            String? @map("review_doing_well")
+  reviewImprove              String? @map("review_improve")
+  overrideHours              Float?  @map("override_hours")
+  overrideHoursJustification String? @map("override_hours_justification")
   createdAt    DateTime  @default(now()) @map("created_at")
 
   devlogs Devlog[]

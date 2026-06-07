@@ -77,19 +77,22 @@ export default async function ReviewQueue() {
                     ) : null}
                   </p>
                 </div>
-                <div className="admin-row__actions">
-                  <form action={firstApproveAction} className="inline-form">
-                    <input type="hidden" name="id" value={s.id} />
-                    <input
-                      className="note-input"
-                      name="reason"
-                      placeholder="Note for the admin (optional)"
-                      aria-label="Approval note"
-                    />
-                    <button type="submit" className="btn btn-primary btn-sm">Recommend approve</button>
-                  </form>
-                  <form action={firstRejectAction} className="inline-form">
-                    <input type="hidden" name="id" value={s.id} />
+                <form
+                  action={firstApproveAction}
+                  className="review-feedback"
+                  style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 280, flex: '1 1 320px' }}
+                >
+                  <input type="hidden" name="id" value={s.id} />
+                  <label className="field">
+                    <span>What are we doing well?</span>
+                    <textarea className="note-input" name="doingWell" rows={2} placeholder="Positive feedback for the submitter" />
+                  </label>
+                  <label className="field">
+                    <span>How can we improve?</span>
+                    <textarea className="note-input" name="improve" rows={2} placeholder="Constructive feedback for the submitter" />
+                  </label>
+                  <label className="field">
+                    <span>If denying — reason</span>
                     <select className="note-input" name="reason" defaultValue={REJECTION_REASONS[0]} aria-label="Denial reason">
                       {REJECTION_REASONS.map((reason) => (
                         <option key={reason} value={reason}>
@@ -97,9 +100,12 @@ export default async function ReviewQueue() {
                         </option>
                       ))}
                     </select>
-                    <button type="submit" className="btn btn-outline btn-sm">Recommend deny</button>
-                  </form>
-                </div>
+                  </label>
+                  <div className="inline-form">
+                    <button type="submit" className="btn btn-primary btn-sm">Recommend approve</button>
+                    <button type="submit" formAction={firstRejectAction} className="btn btn-outline btn-sm">Recommend deny</button>
+                  </div>
+                </form>
               </article>
             ))}
           </div>

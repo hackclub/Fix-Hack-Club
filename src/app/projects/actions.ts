@@ -33,6 +33,18 @@ export async function submitFixAction(formData: FormData) {
   const slackId = get('slackId') || profile.slack_id || null;
   const submissionType = get('submissionType') || 'Individual Submission';
 
+  // Unified YSWS submitter fields (all optional). Description maps to `notes`.
+  const description = get('description');
+  const playableUrl = get('playableUrl') || null;
+  const screenshotUrl = get('screenshotUrl') || null;
+  const heardAbout = get('heardAbout') || null;
+  const addressLine1 = get('addressLine1') || null;
+  const addressLine2 = get('addressLine2') || null;
+  const city = get('city') || null;
+  const state = get('state') || null;
+  const country = get('country') || null;
+  const zip = get('zip') || null;
+
   if (!title || !url || !repo) {
     redirect(`/projects/submit?error=${encodeURIComponent('Title, link, and repo are required.')}`);
   }
@@ -54,9 +66,18 @@ export async function submitFixAction(formData: FormData) {
       url,
       repo,
       category,
-      notes: '',
+      notes: description,
       hackatimeProject,
       status: 'Draft',
+      playableUrl,
+      screenshotUrl,
+      heardAbout,
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      country,
+      zip,
     },
   });
 

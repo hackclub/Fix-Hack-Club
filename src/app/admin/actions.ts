@@ -210,3 +210,23 @@ export async function setReviewerRoleAction(formData: FormData) {
   });
   revalidatePath('/admin/users');
 }
+
+// Optional hours override for the Unified YSWS export (separate from our points
+// economy). Blank clears it. Admin-only, set during the final review.
+export async function setOverrideHoursAction(formData: FormData) {
+  await requireAdmin();
+  const id = str(formData, 'id');
+  const raw = str(formData, 'overrideHours');
+  const justification = str(formData, 'overrideJustification');
+  const parsed = raw === '' ? null : Number(raw);
+  const hours = parsed != null && Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed * 100) / 100 : null;
+
+  await prisma.submission.update({
+    where: { id },
+    data: {
+      overrideHours: hours,
+      overrideHoursJustification: justification || null,
+    },
+  });
+  revalidatePath('/admin/submissions');
+}
