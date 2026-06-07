@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { requireAdminOnly } from '@/lib/access';
 import { prisma } from '@/lib/db';
 import { REVIEW_STAGE } from '@/lib/reviews';
 
@@ -6,6 +7,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOverview() {
+  await requireAdminOnly();
+
   const [awaitingFirst, awaitingFinal, approvedSubs, pendingOrders, listings, items, users] = await Promise.all([
     prisma.submission.count({ where: { status: 'Submitted', reviewStage: REVIEW_STAGE.FIRST } }),
     prisma.submission.count({ where: { status: 'Submitted', reviewStage: REVIEW_STAGE.FINAL } }),
@@ -17,7 +20,7 @@ export default async function AdminOverview() {
   ]);
 
   const cards = [
-    { label: 'Awaiting first review', value: awaitingFirst, href: '/review' },
+    { label: 'Awaiting first review', value: awaitingFirst, href: '/admin/review' },
     { label: 'Awaiting your decision', value: awaitingFinal, href: '/admin/submissions' },
     { label: 'Approved fixes', value: approvedSubs, href: '/admin/submissions' },
     { label: 'Orders to fulfill', value: pendingOrders, href: '/admin/orders' },

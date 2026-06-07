@@ -10,8 +10,9 @@ export default async function SiteHeader() {
   const profile = await getSessionProfile();
   const user = profile ? await getDbUser() : null;
   const admin = isAdminId(profile?.id);
-  // Admins can do both review stages, so they always see the Review link too.
-  const reviewer = admin || user?.role === 'REVIEWER';
+  // HeaderNav shows admins the Admin console (which contains first-grade review)
+  // and shows reviewers a direct Review link; pass the raw reviewer role here.
+  const reviewer = user?.role === 'REVIEWER';
   const displayName = profile?.display_name || profile?.first_name || profile?.email || 'Member';
 
   return (

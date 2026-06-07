@@ -1,3 +1,4 @@
+import { requireAdminOnly } from '@/lib/access';
 import { prisma } from '@/lib/db';
 import { createListingAction, deleteListingAction, updateListingAction } from '../actions';
 
@@ -5,6 +6,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminListings() {
+  await requireAdminOnly();
+
   const listings = await prisma.listing.findMany({
     orderBy: [{ priority: 'asc' }, { createdAt: 'asc' }],
   });

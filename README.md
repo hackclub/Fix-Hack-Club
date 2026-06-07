@@ -15,8 +15,8 @@ A YSWS program associated with PullQuests (for Clubs). Participants submit PRs t
 - `/explore` Public feed of approved contributions plus a top-contributor leaderboard.
 - `/u/[id]` Public member profile: points earned, fixes shipped, and approved contributions.
 - `/shop` Redeem points for rewards; shows your balance and recent orders.
-- `/review` First-grade review console (reviewers and admins). Recommend approve/deny with a reason; this advances a submission to the admin's final review.
-- `/admin` Admin console (env allowlist only): final review of submissions, manage listings, manage shop items, fulfill or refund orders, adjust member balances, and grant/revoke the reviewer role.
+- `/admin/review` First-grade review, inside the Admin console. Reviewers and admins recommend approve/deny with a reason; this advances a submission to the final admin review.
+- `/admin` Admin console. Admins (env allowlist) get the full console: final review of submissions, manage listings, manage shop items, fulfill or refund orders, adjust member balances, and grant/revoke the reviewer role. Reviewers are admitted to the console too but only see the **First review** page — every other section is hidden from their nav and blocked at the page level.
 
 ## Reviews & roles
 
@@ -27,14 +27,14 @@ There are three roles (`User.role`): `MEMBER`, `REVIEWER`, and `ADMIN`.
 
 Submissions move through a **two-stage review**. A submission stays in `status: "Submitted"` for the whole review period; the `reviewStage` column tracks where it is:
 
-1. **First-grade review (`reviewStage: "first"`)** — a reviewer or admin opens `/review`, reads the fix, and records an approve/deny recommendation **with a reason**. This never awards points; it just advances the item to `reviewStage: "final"` and stores `firstReviewStatus` / `firstReviewNote`.
-2. **Final review (`reviewStage: "final"`)** — an admin opens `/admin/submissions`, sees the reviewer's recommendation and reason, and makes the final call: **approve** (awards points) or **reject** (records a reason). Admins can also clear the first stage themselves from `/review`, so they can run a submission through both stages.
+1. **First-grade review (`reviewStage: "first"`)** — a reviewer or admin opens `/admin/review`, reads the fix, and records an approve/deny recommendation **with a reason**. This never awards points; it just advances the item to `reviewStage: "final"` and stores `firstReviewStatus` / `firstReviewNote`.
+2. **Final review (`reviewStage: "final"`)** — an admin opens `/admin/submissions`, sees the reviewer's recommendation and reason, and makes the final call: **approve** (awards points) or **reject** (records a reason). Admins can also clear the first stage themselves from `/admin/review`, so they can run a submission through both stages.
 
 ## Economy
 
 Members link a Hackatime project to a submission. When an admin gives final approval, points are paid at 1 per hour of that project's tracked time (fetched live from Hackatime). Submissions with no linked project fall back to a manual point value. Approving credits the author's balance and lifetime total and writes a ledger entry; rejecting an already-approved fix claws the points back. Points are spent in the shop, which creates an order (admins fulfill or refund). There is no voting.
 
-Admin mutations use Next.js Server Actions (in `src/app/admin/actions.ts` and `src/app/shop/actions.ts`), each guarded by the admin allowlist. First-grade review actions live in `src/app/review/actions.ts` and are guarded so only reviewers or admins can call them.
+Admin mutations use Next.js Server Actions (in `src/app/admin/actions.ts` and `src/app/shop/actions.ts`), each guarded by the admin allowlist. First-grade review actions live in `src/app/admin/review/actions.ts` and are guarded so only reviewers or admins can call them.
 
 ## Hackatime time tracking
 

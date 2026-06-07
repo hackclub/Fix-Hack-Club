@@ -12,6 +12,8 @@ const nextConfig = {
       { source: '/dashboard/profile', destination: '/account', permanent: false },
       // Explore was renamed to Ships.
       { source: '/explore', destination: '/ships', permanent: false },
+      // First-grade review now lives inside the Admin console.
+      { source: '/review', destination: '/admin/review', permanent: false },
     ];
   },
 };

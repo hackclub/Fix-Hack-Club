@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { requireAdminOnly } from '@/lib/access';
 import { prisma } from '@/lib/db';
 import { fulfillOrderAction, refundOrderAction } from '../actions';
 
@@ -10,6 +11,8 @@ function personName(user: { displayName: string | null; email: string | null } |
 }
 
 export default async function AdminOrders() {
+  await requireAdminOnly();
+
   const [pending, processed] = await Promise.all([
     prisma.shopOrder.findMany({
       where: { status: 'pending' },

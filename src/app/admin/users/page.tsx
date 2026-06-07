@@ -1,3 +1,4 @@
+import { requireAdminOnly } from '@/lib/access';
 import { prisma } from '@/lib/db';
 import { isAdminId } from '@/lib/admin';
 import { formatPoints } from '@/lib/hackatime';
@@ -7,6 +8,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminUsers() {
+  await requireAdminOnly();
+
   const users = await prisma.user.findMany({
     orderBy: [{ totalEarned: 'desc' }, { createdAt: 'asc' }],
     take: 200,

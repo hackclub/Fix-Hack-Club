@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { Role } from '@prisma/client';
 import { isAdminId } from './admin';
 import { prisma } from './db';
@@ -31,4 +32,17 @@ export async function getAccess(): Promise<Access> {
   const isReviewer = user?.role === Role.REVIEWER;
 
   return { profile, isAdmin, isReviewer, canReview: isAdmin || isReviewer };
+}
+
+// Guard for admin-ONLY pages (everything in /admin except /admin/review).
+// Reviewers are allowed into the admin shell but only for the first-grade
+// review, so bounce them there; send everyone else home or to sign-in.
+export async function requireAdminOnly(): Promise<void> {
+  const { profile, isAdmin, canReview } = await getAccess();
+  if (!profile) {
+    redirect('/api/auth/start');
+  }
+  if (!isAdmin) {
+    redirect(canReview ? '/admin/review' : '/');
+  }
 }

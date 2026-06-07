@@ -98,7 +98,7 @@ export async function submitForReviewAction(formData: FormData) {
 
   revalidatePath(`/projects/${submissionId}`);
   revalidatePath('/account');
-  revalidatePath('/review');
+  revalidatePath('/admin/review');
   revalidatePath('/admin/submissions');
   redirect(`/projects/${submissionId}`);
 }

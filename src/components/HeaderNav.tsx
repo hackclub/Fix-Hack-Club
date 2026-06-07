@@ -15,11 +15,12 @@ const LINKS = [
 export default function HeaderNav({ admin = false, reviewer = false }: { admin?: boolean; reviewer?: boolean }) {
   const pathname = usePathname();
   const items = [...LINKS];
-  if (reviewer) {
-    items.push({ href: '/review', label: 'Review' });
-  }
+  // Admins reach first-grade review inside the Admin console. Reviewers (no
+  // admin access) get a direct link into the console's review page.
   if (admin) {
     items.push({ href: '/admin', label: 'Admin' });
+  } else if (reviewer) {
+    items.push({ href: '/admin/review', label: 'Review' });
   }
 
   return (

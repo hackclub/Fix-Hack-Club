@@ -1,3 +1,4 @@
+import { requireAdminOnly } from '@/lib/access';
 import { prisma } from '@/lib/db';
 import { createShopItemAction, deleteShopItemAction, updateShopItemAction } from '../actions';
 
@@ -5,6 +6,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminShop() {
+  await requireAdminOnly();
+
   const items = await prisma.shopItem.findMany({ orderBy: { createdAt: 'desc' } });
 
   return (
