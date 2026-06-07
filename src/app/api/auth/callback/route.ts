@@ -16,6 +16,19 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 async function upsertUser(profile: HackClubProfile) {
+  // Admins are controlled by the env allowlist. For everyone else, preserve a
+  // previously granted REVIEWER role across logins (admins assign it from the
+  // Users page) instead of resetting it to MEMBER on every sign-in.
+  const existing = await prisma.user.findUnique({
+    where: { hackClubId: profile.id },
+    select: { role: true },
+  });
+  const role = isAdminId(profile.id)
+    ? Role.ADMIN
+    : existing?.role === Role.REVIEWER
+      ? Role.REVIEWER
+      : Role.MEMBER;
+
   const data = {
     email: profile.email || null,
     displayName: profile.display_name || null,
@@ -24,7 +37,7 @@ async function upsertUser(profile: HackClubProfile) {
     slackId: profile.slack_id || null,
     verificationStatus: profile.verification_status || null,
     avatar: profile.avatar || null,
-    role: isAdminId(profile.id) ? Role.ADMIN : Role.MEMBER,
+    role,
     lastSignedInAt: new Date(),
   };
 

@@ -72,7 +72,7 @@ export default async function ProjectPage({
               <>
                 <h3>Draft</h3>
                 <p className="dashboard-copy">
-                  This fix is a private draft. Keep posting devlogs as you work — when it&apos;s ready, submit it so an admin can review and award points.
+                  This fix is a private draft. Keep posting devlogs as you work — when it&apos;s ready, submit it so a reviewer can take a look and an admin can award points.
                 </p>
                 <form action={submitForReviewAction}>
                   <input type="hidden" name="submissionId" value={submission.id} />
@@ -83,7 +83,7 @@ export default async function ProjectPage({
               <>
                 <h3>In review</h3>
                 <p className="dashboard-copy">
-                  Submitted for review — an admin will approve or reject it soon. You can still post devlogs while you wait.
+                  In the review queue — a reviewer takes a first look, then an admin makes the final call. You can still post devlogs while you wait.
                 </p>
               </>
             ) : submission.status === 'Rejected' ? (

@@ -4,11 +4,12 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db';
 import { fetchHackatimeProjectSeconds } from '@/lib/hackatime';
+import { REVIEW_STAGE } from '@/lib/reviews';
 import { getSessionProfile } from '@/lib/session';
 
 // Create a new fix as a DRAFT and send the author to its project page.
-// Drafts are private working space — they only enter the admin review queue
-// once the author presses "Submit for review" (submitForReviewAction below).
+// Drafts are private working space — they only enter the review queue once the
+// author presses "Submit for review" (submitForReviewAction below).
 export async function submitFixAction(formData: FormData) {
   const profile = await getSessionProfile();
   if (!profile) {
@@ -64,9 +65,10 @@ export async function submitFixAction(formData: FormData) {
   redirect(`/projects/${created.id}`);
 }
 
-// Move a draft (or a previously rejected fix) into the admin review queue.
-// Only the author may do this, and only from Draft/Rejected — never from an
-// already-submitted or approved state.
+// Move a draft (or a previously rejected fix) into the review queue. Only the
+// author may do this, and only from Draft/Rejected — never from an already-
+// submitted or approved state. Resubmitting resets the two-stage review so the
+// fix goes through a fresh first-grade review (clears any stale recommendation).
 export async function submitForReviewAction(formData: FormData) {
   const profile = await getSessionProfile();
   if (!profile) {
@@ -83,12 +85,20 @@ export async function submitForReviewAction(formData: FormData) {
   if (submission.status === 'Draft' || submission.status === 'Rejected') {
     await prisma.submission.update({
       where: { id: submissionId },
-      data: { status: 'Submitted' },
+      data: {
+        status: 'Submitted',
+        reviewStage: REVIEW_STAGE.FIRST,
+        firstReviewStatus: null,
+        firstReviewNote: null,
+        firstReviewedAt: null,
+        firstReviewedById: null,
+      },
     });
   }
 
   revalidatePath(`/projects/${submissionId}`);
   revalidatePath('/account');
+  revalidatePath('/review');
   revalidatePath('/admin/submissions');
   redirect(`/projects/${submissionId}`);
 }

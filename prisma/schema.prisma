@@ -14,6 +14,7 @@ datasource db {
 
 enum Role {
   MEMBER
+  REVIEWER
   ADMIN
 }
 
@@ -87,6 +88,14 @@ model Submission {
   reviewedAt   DateTime? @map("reviewed_at")
   reviewedById String?   @map("reviewed_by_id")
   reviewNote   String?   @map("review_note")
+  // Two-stage review. While `status` is "Submitted" a submission is either
+  // awaiting the first-grade (reviewer) review (reviewStage "first") or, once a
+  // reviewer has recommended approve/deny, the final admin review ("final").
+  reviewStage       String    @default("first") @map("review_stage")
+  firstReviewStatus String?   @map("first_review_status")
+  firstReviewNote   String?   @map("first_review_note")
+  firstReviewedAt   DateTime? @map("first_reviewed_at")
+  firstReviewedById String?   @map("first_reviewed_by_id")
   createdAt    DateTime  @default(now()) @map("created_at")
 
   devlogs Devlog[]

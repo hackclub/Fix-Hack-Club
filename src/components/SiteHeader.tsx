@@ -10,6 +10,8 @@ export default async function SiteHeader() {
   const profile = await getSessionProfile();
   const user = profile ? await getDbUser() : null;
   const admin = isAdminId(profile?.id);
+  // Admins can do both review stages, so they always see the Review link too.
+  const reviewer = admin || user?.role === 'REVIEWER';
   const displayName = profile?.display_name || profile?.first_name || profile?.email || 'Member';
 
   return (
@@ -18,7 +20,7 @@ export default async function SiteHeader() {
         <span aria-hidden="true">⚙</span> FixHC
       </Link>
 
-      <HeaderNav admin={admin} />
+      <HeaderNav admin={admin} reviewer={reviewer} />
 
       <div className="dash-topbar__right">
         {user ? (

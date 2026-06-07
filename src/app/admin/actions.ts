@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import { Role } from '@prisma/client';
 import { isAdminId } from '@/lib/admin';
 import { config } from '@/lib/config';
 import { prisma } from '@/lib/db';
@@ -40,10 +41,11 @@ function num(formData: FormData, name: string, fallback = 0): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
-// ---- Submissions ----
-// Points = 1 per hour of the linked Hackatime project (fetched live by the
-// author's Hackatime user id). Submissions without a linked project fall back
-// to the manually entered points.
+// ---- Submissions (final review) ----
+// This is the second-grade review: the admin makes the final call. Points = 1
+// per hour of the linked Hackatime project (fetched live by the author's
+// Hackatime user id). Submissions without a linked project fall back to the
+// manually entered points.
 export async function approveSubmissionAction(formData: FormData) {
   const admin = await requireAdmin();
   const id = str(formData, 'id');
@@ -186,5 +188,25 @@ export async function refundOrderAction(formData: FormData) {
 export async function adjustBalanceAction(formData: FormData) {
   await requireAdmin();
   await adjustBalance(str(formData, 'userId'), num(formData, 'delta', 0), str(formData, 'reason'));
+  revalidatePath('/admin/users');
+}
+
+// Grant or revoke the REVIEWER role (first-grade review access). The ADMIN role
+// is controlled by the env allowlist, so we never touch env-admin accounts here.
+export async function setReviewerRoleAction(formData: FormData) {
+  await requireAdmin();
+  const userId = str(formData, 'userId');
+  const makeReviewer = str(formData, 'makeReviewer') === '1';
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || isAdminId(user.hackClubId)) {
+    revalidatePath('/admin/users');
+    return;
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { role: makeReviewer ? Role.REVIEWER : Role.MEMBER },
+  });
   revalidatePath('/admin/users');
 }

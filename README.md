@@ -15,13 +15,26 @@ A YSWS program associated with PullQuests (for Clubs). Participants submit PRs t
 - `/explore` Public feed of approved contributions plus a top-contributor leaderboard.
 - `/u/[id]` Public member profile: points earned, fixes shipped, and approved contributions.
 - `/shop` Redeem points for rewards; shows your balance and recent orders.
-- `/admin` Admin console (env allowlist only): review submissions and award points, manage listings, manage shop items, fulfill or refund orders, and adjust member balances.
+- `/review` First-grade review console (reviewers and admins). Recommend approve/deny with a reason; this advances a submission to the admin's final review.
+- `/admin` Admin console (env allowlist only): final review of submissions, manage listings, manage shop items, fulfill or refund orders, adjust member balances, and grant/revoke the reviewer role.
+
+## Reviews & roles
+
+There are three roles (`User.role`): `MEMBER`, `REVIEWER`, and `ADMIN`.
+
+- **Admins** are controlled by the `ADMIN_HACK_CLUB_IDS` env allowlist (see `src/lib/admin.ts`). Admins can do everything, including **both** review stages.
+- **Reviewers** are granted in-app by an admin on `/admin/users` (toggles the DB `role`). A reviewer can perform the first-grade review only. The grant is preserved across logins (the OAuth callback won't reset a reviewer back to member).
+
+Submissions move through a **two-stage review**. A submission stays in `status: "Submitted"` for the whole review period; the `reviewStage` column tracks where it is:
+
+1. **First-grade review (`reviewStage: "first"`)** — a reviewer or admin opens `/review`, reads the fix, and records an approve/deny recommendation **with a reason**. This never awards points; it just advances the item to `reviewStage: "final"` and stores `firstReviewStatus` / `firstReviewNote`.
+2. **Final review (`reviewStage: "final"`)** — an admin opens `/admin/submissions`, sees the reviewer's recommendation and reason, and makes the final call: **approve** (awards points) or **reject** (records a reason). Admins can also clear the first stage themselves from `/review`, so they can run a submission through both stages.
 
 ## Economy
 
-Members link a Hackatime project to a submission. When an admin approves it, points are paid at 1 per hour of that project's tracked time (fetched live from Hackatime). Submissions with no linked project fall back to a manual point value. Approving credits the author's balance and lifetime total and writes a ledger entry; rejecting an already-approved fix claws the points back. Points are spent in the shop, which creates an order (admins fulfill or refund). There is no voting.
+Members link a Hackatime project to a submission. When an admin gives final approval, points are paid at 1 per hour of that project's tracked time (fetched live from Hackatime). Submissions with no linked project fall back to a manual point value. Approving credits the author's balance and lifetime total and writes a ledger entry; rejecting an already-approved fix claws the points back. Points are spent in the shop, which creates an order (admins fulfill or refund). There is no voting.
 
-Admin mutations use Next.js Server Actions (in `src/app/admin/actions.ts` and `src/app/shop/actions.ts`), each guarded by the admin allowlist.
+Admin mutations use Next.js Server Actions (in `src/app/admin/actions.ts` and `src/app/shop/actions.ts`), each guarded by the admin allowlist. First-grade review actions live in `src/app/review/actions.ts` and are guarded so only reviewers or admins can call them.
 
 ## Hackatime time tracking
 
@@ -53,7 +66,7 @@ npm run dev
 - `HACKCLUB_CLIENT_ID`, `HACKCLUB_CLIENT_SECRET`: Hack Club OAuth credentials.
 - `HACKCLUB_AUTH_HOST`: Optional, defaults to `https://auth.hackclub.com`.
 - `SESSION_SECRET`: Secret used to sign the session cookie.
-- `ADMIN_HACK_CLUB_IDS`: Comma or space separated Hack Club identity ids that get the ADMIN role and access to `/admin`.
+- `ADMIN_HACK_CLUB_IDS`: Comma or space separated Hack Club identity ids that get the ADMIN role and access to `/admin`. (Reviewers are granted in-app from `/admin/users`, not via an env var.)
 - `HACKATIME_CLIENT_ID`, `HACKATIME_CLIENT_SECRET`: Hackatime OAuth app credentials (confidential app).
 - `HACKATIME_BYPASS_KEYS`: Optional rate-limit bypass header for the Hackatime public stats endpoint.
 - `HACKATIME_START_DATE`: Optional fixed epoch (YYYY-MM-DD, default `2026-01-01`) for Hackatime stats so tracked time is a stable running total. Set it to your program's start date to only count time logged after launch.
@@ -63,7 +76,7 @@ The OAuth `redirect_uri` is `<origin>/api/auth/callback`. It must be registered 
 
 ## Database
 
-The schema lives in `prisma/schema.prisma` with three models: `Listing`, `User`, and `Submission`.
+The schema lives in `prisma/schema.prisma`. Core models: `Listing`, `User`, `Submission`, `Devlog`, `LedgerEntry`, `ShopItem`, and `ShopOrder`. The `User.role` enum is `MEMBER | REVIEWER | ADMIN`; submissions carry both the first-grade review fields (`reviewStage`, `firstReviewStatus`, `firstReviewNote`, `firstReviewedAt`, `firstReviewedById`) and the final review fields (`status`, `reviewedAt`, `reviewedById`, `reviewNote`, `pointsAwarded`).
 
 - `npm run db:push` syncs the schema to the database (good for first setup).
 - `npm run db:migrate` runs committed migrations (`prisma migrate deploy`) for production.

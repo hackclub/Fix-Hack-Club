@@ -2,58 +2,55 @@ import Link from 'next/link';
 import { prisma } from '@/lib/db';
 import { formatPoints, secondsToHours, secondsToPoints } from '@/lib/hackatime';
 import { REJECTION_REASONS, REVIEW_STAGE } from '@/lib/reviews';
-import { approveSubmissionAction, rejectSubmissionAction } from '../actions';
+import { firstApproveAction, firstRejectAction } from './actions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export default async function AdminSubmissions() {
-  // Final review queue: a reviewer has made a first-grade recommendation and the
-  // submission is awaiting the admin's final call.
+export default async function ReviewQueue() {
+  // Stage 1 queue: submitted fixes that still need a first-grade review.
   const pending = await prisma.submission.findMany({
-    where: { status: 'Submitted', reviewStage: REVIEW_STAGE.FINAL },
-    orderBy: { firstReviewedAt: 'asc' },
+    where: { status: 'Submitted', reviewStage: REVIEW_STAGE.FIRST },
+    orderBy: { createdAt: 'asc' },
     include: { _count: { select: { devlogs: true } } },
   });
 
-  // How many are still waiting for a first-grade review (reviewers, or an admin).
-  const awaitingFirst = await prisma.submission.count({
-    where: { status: 'Submitted', reviewStage: REVIEW_STAGE.FIRST },
-  });
-
+  // Recently first-reviewed: shows your recommendation and where the admin
+  // landed (still awaiting them while status is "Submitted").
   const reviewed = await prisma.submission.findMany({
-    where: { status: { in: ['Approved', 'Rejected'] } },
-    orderBy: { reviewedAt: 'desc' },
+    where: { firstReviewedAt: { not: null } },
+    orderBy: { firstReviewedAt: 'desc' },
     take: 25,
   });
+
+  // Reuse the existing status-badge tones (approved/rejected/submitted) so the
+  // "Final" column is always styled, even while the admin hasn't decided yet.
+  const finalState = (status: string): { label: string; tone: string } => {
+    if (status === 'Approved') return { label: 'Approved', tone: 'approved' };
+    if (status === 'Rejected') return { label: 'Rejected', tone: 'rejected' };
+    return { label: 'Awaiting admin', tone: 'submitted' };
+  };
 
   return (
     <>
       <div className="dash-pagehead">
         <div className="dash-pagehead__copy">
-          <p className="auth-card__eyebrow">Final review</p>
-          <h1 className="dashboard-title">Submissions</h1>
+          <p className="auth-card__eyebrow">First-grade review</p>
+          <h1 className="dashboard-title">Review queue</h1>
           <p className="dashboard-copy">
-            A reviewer has taken a first look — their recommendation is shown below. You make the final call: approve and set the points, or reject with a reason.
+            Take a first look and recommend approve or deny with a reason. An admin makes the final call and awards points.
           </p>
         </div>
       </div>
 
-      {awaitingFirst > 0 ? (
-        <p className="flash">
-          {awaitingFirst} submission{awaitingFirst === 1 ? '' : 's'} still awaiting a first-grade review.{' '}
-          <Link href="/review">Open the review queue →</Link>
-        </p>
-      ) : null}
-
       <section className="dashboard-panel">
         <div className="dashboard-form__header">
           <p className="auth-card__eyebrow">Queue</p>
-          <h3>Awaiting your decision ({pending.length})</h3>
+          <h3>Awaiting first review ({pending.length})</h3>
         </div>
 
         {pending.length === 0 ? (
-          <p className="dashboard-list__empty">Nothing waiting for a final decision.</p>
+          <p className="dashboard-list__empty">Nothing waiting for a first review.</p>
         ) : (
           <div className="admin-rows">
             {pending.map((s) => (
@@ -63,13 +60,6 @@ export default async function AdminSubmissions() {
                   <p className="admin-row__meta">
                     {s.category}
                     {s.repo ? ` · ${s.repo}` : ''} · by {s.displayName || s.email || 'Member'}
-                  </p>
-                  <p className="admin-row__meta">
-                    Reviewer recommendation:{' '}
-                    <span className={`status-badge status-${(s.firstReviewStatus || 'submitted').toLowerCase()}`}>
-                      {s.firstReviewStatus === 'Approved' ? 'Approve' : s.firstReviewStatus === 'Rejected' ? 'Deny' : 'Pending'}
-                    </span>
-                    {s.firstReviewNote ? ` · ${s.firstReviewNote}` : ''}
                   </p>
                   {s.notes ? <p className="admin-row__notes">{s.notes}</p> : null}
                   {s.hackatimeProject ? (
@@ -88,33 +78,26 @@ export default async function AdminSubmissions() {
                   </p>
                 </div>
                 <div className="admin-row__actions">
-                  <form action={approveSubmissionAction} className="inline-form">
+                  <form action={firstApproveAction} className="inline-form">
                     <input type="hidden" name="id" value={s.id} />
-                    {s.hackatimeProject ? null : (
-                      <input
-                        className="points-input"
-                        type="number"
-                        name="points"
-                        min={0}
-                        step={0.1}
-                        defaultValue={10}
-                        aria-label="Points to award"
-                      />
-                    )}
-                    <button type="submit" className="btn btn-primary btn-sm">
-                      {s.hackatimeProject ? 'Approve (pay hours)' : 'Approve'}
-                    </button>
+                    <input
+                      className="note-input"
+                      name="reason"
+                      placeholder="Note for the admin (optional)"
+                      aria-label="Approval note"
+                    />
+                    <button type="submit" className="btn btn-primary btn-sm">Recommend approve</button>
                   </form>
-                  <form action={rejectSubmissionAction} className="inline-form">
+                  <form action={firstRejectAction} className="inline-form">
                     <input type="hidden" name="id" value={s.id} />
-                    <select className="note-input" name="reason" defaultValue={REJECTION_REASONS[0]} aria-label="Rejection reason">
+                    <select className="note-input" name="reason" defaultValue={REJECTION_REASONS[0]} aria-label="Denial reason">
                       {REJECTION_REASONS.map((reason) => (
                         <option key={reason} value={reason}>
                           {reason}
                         </option>
                       ))}
                     </select>
-                    <button type="submit" className="btn btn-outline btn-sm">Reject</button>
+                    <button type="submit" className="btn btn-outline btn-sm">Recommend deny</button>
                   </form>
                 </div>
               </article>
@@ -126,19 +109,19 @@ export default async function AdminSubmissions() {
       <section className="dashboard-panel">
         <div className="dashboard-form__header">
           <p className="auth-card__eyebrow">History</p>
-          <h3>Recently reviewed</h3>
+          <h3>Recently first-reviewed</h3>
         </div>
         {reviewed.length === 0 ? (
-          <p className="dashboard-list__empty">No reviewed submissions yet.</p>
+          <p className="dashboard-list__empty">No first reviews yet.</p>
         ) : (
           <table className="admin-table">
             <thead>
               <tr>
                 <th>Title</th>
                 <th>By</th>
-                <th>Status</th>
-                <th>Points</th>
+                <th>Recommendation</th>
                 <th>Reason</th>
+                <th>Final</th>
               </tr>
             </thead>
             <tbody>
@@ -147,10 +130,16 @@ export default async function AdminSubmissions() {
                   <td>{s.title}</td>
                   <td>{s.displayName || s.email || 'Member'}</td>
                   <td>
-                    <span className={`status-badge status-${s.status.toLowerCase()}`}>{s.status}</span>
+                    <span className={`status-badge status-${(s.firstReviewStatus || 'submitted').toLowerCase()}`}>
+                      {s.firstReviewStatus || '—'}
+                    </span>
                   </td>
-                  <td>{formatPoints(s.pointsAwarded)}</td>
-                  <td>{s.status === 'Rejected' ? s.reviewNote || '—' : '—'}</td>
+                  <td>{s.firstReviewNote || '—'}</td>
+                  <td>
+                    <span className={`status-badge status-${finalState(s.status).tone}`}>
+                      {finalState(s.status).label}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>

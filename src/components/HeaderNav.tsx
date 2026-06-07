@@ -12,9 +12,15 @@ const LINKS = [
 
 // Primary navigation links with active-route highlighting. Rendered inside the
 // server-side SiteHeader so the right-hand session UI stays server-rendered.
-export default function HeaderNav({ admin = false }: { admin?: boolean }) {
+export default function HeaderNav({ admin = false, reviewer = false }: { admin?: boolean; reviewer?: boolean }) {
   const pathname = usePathname();
-  const items = admin ? [...LINKS, { href: '/admin', label: 'Admin' }] : LINKS;
+  const items = [...LINKS];
+  if (reviewer) {
+    items.push({ href: '/review', label: 'Review' });
+  }
+  if (admin) {
+    items.push({ href: '/admin', label: 'Admin' });
+  }
 
   return (
     <nav className="site-nav" aria-label="Primary">
