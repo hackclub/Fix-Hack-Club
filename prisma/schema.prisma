@@ -1,0 +1,194 @@
+// Prisma schema for Fix-Hack-Club
+// Postgres-backed. Run `npx prisma migrate deploy` (or `npx prisma db push`)
+// then `npx prisma db seed` to load the starter data.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  MEMBER
+  REVIEWER
+  ADMIN
+}
+
+model Listing {
+  id           String    @id @default(cuid())
+  externalId   String?   @unique @map("external_id")
+  title        String
+  description  String    @default("")
+  requirements String[]  @default([])
+  url          String    @default("")
+  githubUrl    String    @default("") @map("github_url")
+  status       String    @default("active")
+  priority     Int       @default(0)
+  completedAt  DateTime? @map("completed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([priority])
+  @@map("listings")
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  hackClubId         String    @unique @map("hack_club_id")
+  email              String?
+  displayName        String?   @map("display_name")
+  firstName          String?   @map("first_name")
+  lastName           String?   @map("last_name")
+  slackId            String?   @map("slack_id")
+  verificationStatus String?   @map("verification_status")
+  avatar             String?
+  role               Role      @default(MEMBER)
+  balance            Float     @default(0)
+  totalEarned        Float     @default(0) @map("total_earned")
+  bio                String?
+  hackatimeUserId    String?   @map("hackatime_user_id")
+  hackatimeUsername  String?   @map("hackatime_username")
+  hackatimeSeconds   Int       @default(0) @map("hackatime_seconds")
+  hackatimeSyncedAt  DateTime? @map("hackatime_synced_at")
+  hackatimeConnectedAt DateTime? @map("hackatime_connected_at")
+  lastSignedInAt     DateTime? @map("last_signed_in_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  ledger LedgerEntry[]
+  orders ShopOrder[]
+
+  @@map("users")
+}
+
+model Submission {
+  id           String    @id @default(cuid())
+  hackClubId   String    @map("hack_club_id")
+  email        String?
+  displayName  String?   @map("display_name")
+  firstName      String? @map("first_name")
+  lastName       String? @map("last_name")
+  githubUsername String? @map("github_username")
+  dateOfBirth    String? @map("date_of_birth")
+  slackId        String? @map("slack_id")
+  submissionType String? @map("submission_type")
+  title        String
+  url          String    @default("")
+  repo         String    @default("")
+  category     String    @default("Other")
+  notes        String    @default("")
+  status       String    @default("Submitted")
+  pointsAwarded Float    @default(0) @map("points_awarded")
+  hackatimeProject String? @map("hackatime_project")
+  loggedSeconds Int      @default(0) @map("logged_seconds")
+  reviewedAt   DateTime? @map("reviewed_at")
+  reviewedById String?   @map("reviewed_by_id")
+  reviewNote   String?   @map("review_note")
+  // Two-stage review. While `status` is "Submitted" a submission is either
+  // awaiting the first-grade (reviewer) review (reviewStage "first") or, once a
+  // reviewer has recommended approve/deny, the final admin review ("final").
+  reviewStage       String    @default("first") @map("review_stage")
+  firstReviewStatus String?   @map("first_review_status")
+  firstReviewNote   String?   @map("first_review_note")
+  firstReviewedAt   DateTime? @map("first_reviewed_at")
+  firstReviewedById String?   @map("first_reviewed_by_id")
+  // Unified YSWS export fields. Submitter-provided (collected in the submit
+  // wizard); Description reuses `notes` above. Mailing address is for prize
+  // fulfilment by the review program.
+  playableUrl    String? @map("playable_url")
+  heardAbout     String? @map("heard_about")
+  screenshotUrl  String? @map("screenshot_url")
+  addressLine1   String? @map("address_line1")
+  addressLine2   String? @map("address_line2")
+  city           String?
+  state          String?
+  country        String?
+  zip            String?
+  // Reviewer-provided during review (first-grade feedback + optional hours override).
+  reviewDoingWell            String? @map("review_doing_well")
+  reviewImprove              String? @map("review_improve")
+  overrideHours              Float?  @map("override_hours")
+  overrideHoursJustification String? @map("override_hours_justification")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  devlogs Devlog[]
+
+  @@index([hackClubId])
+  @@index([email])
+  @@index([status])
+  @@map("submissions")
+}
+
+model Devlog {
+  id           String   @id @default(cuid())
+  submissionId String   @map("submission_id")
+  hackClubId   String   @map("hack_club_id")
+  text         String
+  seconds      Int      @default(0)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("devlogs")
+}
+
+model LedgerEntry {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  delta     Float
+  reason    String   @default("")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ledger_entries")
+}
+
+model ShopItem {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  cost        Int      @default(0)
+  imageUrl    String?  @map("image_url")
+  stock       Int?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  orders ShopOrder[]
+
+  @@map("shop_items")
+}
+
+model ShopOrder {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  shopItemId      String?  @map("shop_item_id")
+  itemName        String   @map("item_name")
+  cost            Int      @default(0)
+  status          String   @default("pending")
+  fulfillmentNote String?  @map("fulfillment_note")
+  grantType       String?  @map("grant_type")
+  fulfilment      String?
+  addressLine1    String?  @map("address_line1")
+  addressLine2    String?  @map("address_line2")
+  city            String?
+  state           String?
+  zip             String?
+  country         String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopItem ShopItem? @relation(fields: [shopItemId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@map("shop_orders")
+}
