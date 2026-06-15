@@ -7,7 +7,7 @@
       "requirements": [
         "Add an RSVP on event pages.",
         "Event creator can access full RSVP list.",
-        Other users can only see RSVP count."
+        "Other users can only see RSVP count."
       ],
       "url": "https://events.hackclub.com/",
       "github_url": "https://github.com/hackclub/events",
