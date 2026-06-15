@@ -2,18 +2,15 @@
   "listings": [
     {
       "id": "LISTING-1",
-      "title": "Slack.hackclub.com",
-      "description": "Show this page some love! Make Pull Requests Fulfilling the following requests to earn grants!",
-      "requirements": [
-        "Nicer header graphic.",
-        "Fix or remove the animation on the 'join hack club' box.",
-        "Better backgrounds or graphics generally.",
-        "Add animated screen recording gifs illustrating how to use Slack in the 'How Slack Works' sections."
+      "title": "Add RSVP to Hack Club Events",
+      "description": "Change events.hackclub.com and @Isabelle (app and site are tied together) so that event pages include an RSVP feature which the event creator can access.": [
+        "Add an RSVP on event pages.",
+        "Event creator can access full RSVP list.",
+        "Other users can only see RSVP count."
       ],
-      "url": "https://slack.hackclub.com/",
-      "github_url": "https://github.com/hackclub/slack.hackclub.com",
-      "status": ""
-      "completed_at": "2026-05-13T12:00:00Z"
+      "url": "https://events.hackclub.com/",
+      "github_url": "https://github.com/hackclub/events",
+      "status": "active"
     }
   ]
 }
