@@ -23,7 +23,7 @@ export default async function SubmitPage({
   const sp = await searchParams;
   const user = await getDbUser();
   const connected = Boolean(user?.hackatimeUserId);
-  const projects = connected ? await fetchHackatimeProjects(user!.hackatimeUserId as string) : [];
+  const projects = connected ? await fetchHackatimeProjects(user!.hackatimeToken as string) : [];
 
   const prefill = {
     firstName: profile.first_name || '',

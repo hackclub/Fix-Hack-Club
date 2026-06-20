@@ -148,8 +148,8 @@ export async function postDevlogAction(formData: FormData) {
   let cumulativeSeconds = 0;
   if (submission.hackatimeProject) {
     const author = await prisma.user.findUnique({ where: { hackClubId: submission.hackClubId } });
-    if (author?.hackatimeUserId) {
-      cumulativeSeconds = await fetchHackatimeProjectSeconds(author.hackatimeUserId, submission.hackatimeProject);
+    if (author?.hackatimeUserId && author?.hackatimeToken) {
+      cumulativeSeconds = await fetchHackatimeProjectSeconds(author.hackatimeUserId, author.hackatimeToken, submission.hackatimeProject);
     }
   }
 
