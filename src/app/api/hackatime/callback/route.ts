@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       throw new Error('Hackatime did not return a user id');
     }
 
-    const projects = await fetchHackatimeProjects(me.id);
+    const projects = await fetchHackatimeProjects(token.access_token || '');
     const seconds = projects.reduce((sum, p) => sum + p.seconds, 0);
 
     await prisma.user.update({
@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       data: {
         hackatimeUserId: me.id,
         hackatimeUsername: me.username,
+        hackatimeToken: token.access_token || null,
         hackatimeSeconds: seconds,
         hackatimeSyncedAt: new Date(),
         hackatimeConnectedAt: new Date(),

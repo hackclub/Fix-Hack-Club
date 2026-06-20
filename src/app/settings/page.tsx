@@ -35,7 +35,7 @@ export default async function SettingsPage({
   let topProjects: { name: string; seconds: number }[] = [];
   let totalSeconds = dbUser?.hackatimeSeconds ?? 0;
   if (connected && dbUser) {
-    const projects = await fetchHackatimeProjects(dbUser.hackatimeUserId as string);
+    const projects = await fetchHackatimeProjects(dbUser.hackatimeToken as string);
     if (projects.length) {
       topProjects = projects.slice(0, 5);
       totalSeconds = projects.reduce((sum, p) => sum + p.seconds, 0);

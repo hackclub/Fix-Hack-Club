@@ -52,6 +52,7 @@ model User {
   bio                String?
   hackatimeUserId    String?   @map("hackatime_user_id")
   hackatimeUsername  String?   @map("hackatime_username")
+  hackatimeToken     String?   @map("hackatime_token")
   hackatimeSeconds   Int       @default(0) @map("hackatime_seconds")
   hackatimeSyncedAt  DateTime? @map("hackatime_synced_at")
   hackatimeConnectedAt DateTime? @map("hackatime_connected_at")
