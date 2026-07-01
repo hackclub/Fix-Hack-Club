@@ -10,7 +10,7 @@
     "leaderboard:sync": "node scripts/syncLeaderboard.js"
   },
   "devDependencies": {
-    "vite": "^5.4.14"
+    "vite": "^6.4.3"
   },
   "dependencies": {
     "airtable": "^0.12.2"
