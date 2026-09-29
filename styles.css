@@ -89,6 +89,23 @@ nav {
   transition: color .15s;
 }
 
+.alert-banner {
+  background-color: #ec3750;
+  color: white;
+  padding: 40px;
+  text-align: center;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  font-size: 2rem;
+  position: relative;
+  z-index: 1000;
+}
+
+.alert-banner span {
+  font-weight: 700;
+  margin: 0 6px;
+}
+
 .nav-links a:hover { color: #f1c40f; }
 
 .nav-links a:focus-visible,
