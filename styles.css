@@ -34,7 +34,7 @@ body {
 
 nav {
   position: sticky;
-  top: 0;
+  top: 122px;
   z-index: 10;
   background: rgba(17, 16, 0, 0.96);
   padding: 16px 48px;
@@ -87,6 +87,26 @@ nav {
   text-transform: uppercase;
   padding: 6px 14px;
   transition: color .15s;
+}
+
+.alert-banner {
+  background: rgba(17, 16, 0, 0.96);
+  color: white;
+  padding: 40px;
+  text-align: center;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  font-size: 2rem;
+  position: relative;
+  z-index: 10;
+  border-bottom: 3px solid #f1c40f;
+  position: sticky;
+  top: 0;
+}
+
+.alert-banner span {
+  font-weight: 700;
+  margin: 0 6px;
 }
 
 .nav-links a:hover { color: #f1c40f; }
@@ -516,6 +536,7 @@ footer a:hover { color: #f1c40f; }
   nav {
     padding: 14px 20px;
     position: sticky;
+    top: 275px;
   }
   .hero { padding: 48px 20px 40px; }
   .section, .section-alt { padding: 48px 20px; }
